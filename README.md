@@ -14,7 +14,7 @@ Firebase と SSR (Server Side Rendering) を活用した、チラつきのない
 
 管理者が保存した「生データ」から「公開用HTML」を自動生成。ユーザーのアクセス時に Cloud Functions (SSR) がそれらを合体させて瞬時に表示します。
 
-![システム全体図](assets/clean_line_system_arch.png)
+![システム構成](./assets/clean_line_system_arch.png)
 
 ```mermaid
 sequenceDiagram
@@ -50,6 +50,8 @@ npx firebase login
 # 組み立てと公開
 npm run build && npx firebase deploy
 ```
+
+![導入イメージ](./assets/firebase_setup_steps.png)
 
 ---
 
