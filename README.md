@@ -12,21 +12,23 @@ Firebase と SSR (Server Side Rendering) を活用した、チラつきのない
 
 ## 🏗 システム構成
 
-管理者が保存した「生データ」から「公開用HTML」を自動生成。ユーザーのアクセス時に Cloud Functions (SSR) がそれらを合体させて瞬時に表示します。
+管理者が保存した「生データ」から「公開用HTML」を自動生成。ユーザーのアクセス時に Cloud Functions (SSR) がそれらを合体させて「チラつきなく」瞬時に表示します。
 
-![システム構成](./assets/clean_line_system_arch.png)
+### チラつき防止（SSR）の仕組み
+![リクエストフロー](./assets/detailed_technical_flow.png)
 
 ```mermaid
 sequenceDiagram
     participant Admin as 管理者
-    participant DB as Firestore (クラウド)
+    participant DB as Firestore
     participant SSR as Cloud Functions
     participant User as ユーザー
 
-    Admin->>DB: 1. 保存 (生データ & 生成HTML)
-    User->>SSR: 2. サイトへのアクセス
-    SSR->>DB: 3. データの取得
-    SSR-->>User: 4. 完成したHTMLを返却 (チラつきなし)
+    Admin->>DB: 1. 保存
+    User->>SSR: 2. アクセス
+    SSR->>DB: 3. データ取得
+    Note over SSR: 4. HTMLに注入
+    SSR-->>User: 5. 完成したHTMLを返却
 ```
 
 ---
