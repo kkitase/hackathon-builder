@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>管理画面 | AI Agent Hackathon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <h2
+          style="
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2rem;
+          "
+        >
+          DASHBOARD
+        </h2>
+        <nav class="admin-nav">
+          <button class="admin-nav-btn active" data-target="hero">
+            ヒーロー
+          </button>
+          <button class="admin-nav-btn" data-target="overview">概要</button>
+          <button class="admin-nav-btn" data-target="schedule">
+            スケジュール
+          </button>
+          <button class="admin-nav-btn" data-target="prizes">プライズ</button>
+          <button class="admin-nav-btn" data-target="rules">ルール</button>
+          <button class="admin-nav-btn" data-target="judges">審査員</button>
+          <button class="admin-nav-btn" data-target="projects">
+            プロジェクト
+          </button>
+          <button class="admin-nav-btn" data-target="updates">更新情報</button>
+          <button class="admin-nav-btn" data-target="faq">FAQ</button>
+          <button class="admin-nav-btn" data-target="social">Social</button>
+          <button
+            class="admin-nav-btn"
+            data-target="admins"
+            style="
+              border-top: 1px solid var(--border);
+              margin-top: 1rem;
+              color: var(--primary);
+            "
+          >
+            管理者設定
+          </button>
+        </nav>
+        <div style="margin-top: auto; padding: 1rem">
+          <a
+            href="./index.html"
+            style="
+              color: #94a3b8;
+              text-decoration: none;
+              font-size: 0.875rem;
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+            "
+          >
+            <span>←</span> 公開サイトへ
+          </a>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <header
+          style="
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h1 id="page-title" style="font-size: 1.5rem; font-weight: 800">
+            概要の編集
+          </h1>
+          <div
+            id="save-status"
+            style="font-size: 0.875rem; color: var(--text-muted)"
+          >
+            保存済み
+          </div>
+        </header>
+
+        <div class="admin-card">
+          <div id="form-container">
+            <!-- Form content will be injected here -->
+          </div>
+
+          <div class="admin-actions">
+            <button id="save-btn" class="btn btn-primary">保存する</button>
+            <button
+              id="reset-btn"
+              class="btn"
+              style="background: #e2e8f0; color: var(--text-main)"
+            >
+              リセット
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="./admin.js"></script>
+  </body>
+</html>
