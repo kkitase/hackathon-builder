@@ -110,6 +110,152 @@
       </main>
     </div>
 
+    <!-- ログインオーバーレイ -->
+    <div
+      id="login-overlay"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #f8fafc;
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      "
+    >
+      <div
+        style="
+          background: white;
+          padding: 2.5rem;
+          border-radius: 1.5rem;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+          width: 100%;
+          max-width: 400px;
+          border: 1px solid #e2e8f0;
+        "
+      >
+        <h2
+          style="
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            background: var(--grad-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          "
+        >
+          ADMIN LOGIN
+        </h2>
+        <p
+          style="
+            color: #64748b;
+            font-size: 0.875rem;
+            text-align: center;
+            margin-bottom: 2rem;
+          "
+        >
+          管理者としてログインしてください
+        </p>
+
+        <form
+          id="login-form"
+          style="display: flex; flex-direction: column; gap: 1.25rem"
+        >
+          <div>
+            <label
+              style="
+                display: block;
+                font-size: 0.875rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #475569;
+              "
+              >ユーザーID</label
+            >
+            <input
+              type="text"
+              id="login-userid"
+              placeholder="userid"
+              required
+              style="
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.75rem;
+                font-size: 1rem;
+              "
+            />
+          </div>
+          <div>
+            <label
+              style="
+                display: block;
+                font-size: 0.875rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #475569;
+              "
+              >パスワード</label
+            >
+            <input
+              type="password"
+              id="login-pass"
+              placeholder="password"
+              required
+              style="
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.75rem;
+                font-size: 1rem;
+              "
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            style="margin-top: 0.5rem; padding: 0.875rem"
+          >
+            ログイン
+          </button>
+        </form>
+
+        <div
+          style="
+            margin-top: 2rem;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 1.5rem;
+            text-align: center;
+          "
+        >
+          <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 1rem">
+            または Google アカウントでログイン
+          </p>
+          <button
+            id="google-login-btn"
+            class="btn"
+            style="
+              width: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 0.5rem;
+              background: white;
+              border: 1px solid #e2e8f0;
+              font-size: 0.875rem;
+            "
+          >
+            Googleでログイン
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="./admin.js"></script>
   </body>
 </html>

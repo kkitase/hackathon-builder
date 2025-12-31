@@ -2,33 +2,51 @@ import { auth, db } from "./firebase.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 /**
- * 初期管理者データを Firestore に作成するシード関数
- * デフォルトの ID/Password ユーザーを管理するための設定
+ * 管理者の初期設定が必要かどうかをチェックする
  */
-export const seedAdminData = async () => {
+export const checkNeedsSetup = async () => {
+  const adminRef = doc(db, "config", "admin");
+  const adminSnap = await getDoc(adminRef);
+  return !adminSnap.exists();
+};
+
+/**
+ * ユーザー名とパスワードでログインする (簡易実装)
+ */
+export const loginWithIdPass = async (userid, password) => {
   const adminRef = doc(db, "config", "admin");
   const adminSnap = await getDoc(adminRef);
 
-  if (!adminSnap.exists()) {
-    await setDoc(adminRef, {
-      defaultUser: "antigravity",
-      defaultPass: "JetSki#555",
-      authorizedEmails: [],
-    });
-    console.log("Initial admin data seeded to Firestore.");
+  if (adminSnap.exists()) {
+    const data = adminSnap.data();
+    if (data.defaultUser === userid && data.defaultPass === password) {
+      // ログイン成功
+      localStorage.setItem("admin_mode", "true");
+      localStorage.setItem("admin_user", userid);
+      return true;
+    }
   }
+  return false;
+};
+
+/**
+ * ログアウト処理
+ */
+export const logoutAdmin = async () => {
+  await auth.signOut();
+  localStorage.removeItem("admin_mode");
+  localStorage.removeItem("admin_user");
+  window.location.reload();
 };
 
 /**
  * ユーザーが管理者かどうかを判定する
- * 1. authorizedEmails に含まれるメールアドレスか
- * 2. defaultUser としてログインしているか (ID/Pass 認証時)
  */
 export const checkIsAdmin = async (user) => {
-  if (!user) return false;
+  // admin_mode が有効なら管理者とみなす
+  if (localStorage.getItem("admin_mode") === "true") return true;
 
-  // ID/Pass 認証のダミーユーザー判定 (Firebase Auth ではなくカスタムロジック)
-  if (user.uid === "default-admin-uid") return true;
+  if (!user) return false;
 
   // Google 認証ユーザー等のメールアドレス判定
   const adminRef = doc(db, "config", "admin");
@@ -36,7 +54,7 @@ export const checkIsAdmin = async (user) => {
 
   if (adminSnap.exists()) {
     const data = adminSnap.data();
-    return data.authorizedEmails.includes(user.email);
+    return data.authorizedEmails?.includes(user.email);
   }
 
   return false;

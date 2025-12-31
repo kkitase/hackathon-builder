@@ -8,7 +8,14 @@ import {
   arrayUnion,
   serverTimestamp,
 } from "firebase/firestore";
-import { checkIsAdmin } from "./auth-utils.js";
+import {
+  checkIsAdmin,
+  loginWithIdPass,
+  logoutAdmin,
+  checkNeedsSetup,
+} from "./auth-utils.js";
+import { signInWithPopup } from "firebase/auth";
+import { googleProvider } from "./firebase.js";
 
 // Admin Logic with Form-based Editing
 document.addEventListener("DOMContentLoaded", () => {
@@ -937,25 +944,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 初期化
   (async () => {
+    // データベースが空の場合の警告（初回セットアップ用）
+    const needsSetup = await checkNeedsSetup();
+    if (needsSetup) {
+      console.warn(
+        "Firestoreに管理者情報が見つかりません。セットアップが必要です。"
+      );
+    }
+
+    const loginOverlay = document.getElementById("login-overlay");
+    const loginForm = document.getElementById("login-form");
+    const googleLoginBtn = document.getElementById("google-login-btn");
+
+    // ID/Pass ログイン処理
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userid = document.getElementById("login-userid").value;
+      const pass = document.getElementById("login-pass").value;
+
+      const success = await loginWithIdPass(userid, pass);
+      if (success) {
+        loginOverlay.style.display = "none";
+        await syncTabsData();
+        await renderForm(currentTab);
+      } else {
+        alert("IDまたはパスワードが正しくありません。");
+      }
+    });
+
+    // Google ログイン処理
+    googleLoginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch (err) {
+        alert("Google ログインに失敗しました: " + err.message);
+      }
+    });
+
     onAuthStateChanged(auth, async (user) => {
-      const isAdminMode = localStorage.getItem("admin_mode") === "true";
-      if (!user && !isAdminMode) {
-        alert("アクセス権がありません。ログインしてください。");
-        window.location.href = "./index.html";
+      // カスタム admin_mode か Google 認証ユーザーかをチェック
+      const isAdmin = await checkIsAdmin(user);
+
+      if (!isAdmin) {
+        loginOverlay.style.display = "flex";
         return;
       }
 
-      if (user) {
-        const isAdmin = await checkIsAdmin(user);
-        if (!isAdmin) {
-          alert("管理者権限が必要です。");
-          window.location.href = "./index.html";
-          return;
-        }
-      }
-
+      // ログイン成功
+      loginOverlay.style.display = "none";
       await syncTabsData();
       await renderForm(currentTab);
     });
   })();
+
+  // ログアウトボタンの追加（DASHBOARD タイトルの横など）
+  const dashboardTitle = document.querySelector(".admin-sidebar h2");
+  if (dashboardTitle) {
+    const logoutBtn = document.createElement("button");
+    logoutBtn.textContent = "Logout";
+    logoutBtn.className = "btn";
+    logoutBtn.style.cssText =
+      "margin-top: 1rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #fee2e2; color: #ef4444; border: 1px solid #fecaca;";
+    logoutBtn.onclick = logoutAdmin;
+    dashboardTitle.after(logoutBtn);
+  }
 });
