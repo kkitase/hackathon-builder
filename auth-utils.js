@@ -5,26 +5,35 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
  * 管理者の初期設定が必要かどうかをチェックする
  */
 export const checkNeedsSetup = async () => {
-  const adminRef = doc(db, "config", "admin");
-  const adminSnap = await getDoc(adminRef);
-  return !adminSnap.exists();
+  try {
+    const adminRef = doc(db, "config", "admin");
+    const adminSnap = await getDoc(adminRef);
+    return !adminSnap.exists();
+  } catch (error) {
+    console.warn("管理者設定の確認中にエラー（権限不足など）が発生しました。");
+    return false;
+  }
 };
 
 /**
  * ユーザー名とパスワードでログインする (簡易実装)
  */
 export const loginWithIdPass = async (userid, password) => {
-  const adminRef = doc(db, "config", "admin");
-  const adminSnap = await getDoc(adminRef);
+  try {
+    const adminRef = doc(db, "config", "admin");
+    const adminSnap = await getDoc(adminRef);
 
-  if (adminSnap.exists()) {
-    const data = adminSnap.data();
-    if (data.defaultUser === userid && data.defaultPass === password) {
-      // ログイン成功
-      localStorage.setItem("admin_mode", "true");
-      localStorage.setItem("admin_user", userid);
-      return true;
+    if (adminSnap.exists()) {
+      const data = adminSnap.data();
+      if (data.defaultUser === userid && data.defaultPass === password) {
+        // ログイン成功
+        localStorage.setItem("admin_mode", "true");
+        localStorage.setItem("admin_user", userid);
+        return true;
+      }
     }
+  } catch (error) {
+    console.warn("ID/Pass 認証用のデータ取得に失敗しました:", error);
   }
   return false;
 };
@@ -48,13 +57,20 @@ export const checkIsAdmin = async (user) => {
 
   if (!user) return false;
 
-  // Google 認証ユーザー等のメールアドレス判定
-  const adminRef = doc(db, "config", "admin");
-  const adminSnap = await getDoc(adminRef);
+  try {
+    // Google 認証ユーザー等のメールアドレス判定
+    const adminRef = doc(db, "config", "admin");
+    const adminSnap = await getDoc(adminRef);
 
-  if (adminSnap.exists()) {
-    const data = adminSnap.data();
-    return data.authorizedEmails?.includes(user.email);
+    if (adminSnap.exists()) {
+      const data = adminSnap.data();
+      return data.authorizedEmails?.includes(user.email);
+    }
+  } catch (error) {
+    console.warn(
+      "管理者権限の確認に失敗しました（未ログインの可能性があります）:",
+      error
+    );
   }
 
   return false;

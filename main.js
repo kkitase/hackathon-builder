@@ -6,7 +6,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
-import { seedAdminData, checkIsAdmin } from "./auth-utils.js";
+import { checkIsAdmin } from "./auth-utils.js";
 
 // タブコンテンツのフォールバック（Firestore にデータがない場合のみ表示）
 const defaultTabData = {
@@ -509,7 +509,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 初期化処理を非同期で行う
   (async () => {
-    await seedAdminData();
     await loadHeroData();
     await loadSocialData();
     // 最初のタブを表示（審査員がデフォルト）

@@ -119,23 +119,27 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: #f8fafc;
+        background: rgba(248, 250, 252, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         z-index: 10000;
         display: none;
         align-items: center;
         justify-content: center;
         padding: 1rem;
+        transition: all 0.3s ease;
       "
     >
       <div
         style="
-          background: white;
-          padding: 2.5rem;
-          border-radius: 1.5rem;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.95);
+          padding: 3rem;
+          border-radius: 2rem;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
           width: 100%;
-          max-width: 400px;
-          border: 1px solid #e2e8f0;
+          max-width: 420px;
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          animation: slideUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
         "
       >
         <h2
@@ -145,6 +149,7 @@
             text-align: center;
             margin-bottom: 0.5rem;
             background: var(--grad-main);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
           "
@@ -219,7 +224,12 @@
           <button
             type="submit"
             class="btn btn-primary"
-            style="margin-top: 0.5rem; padding: 0.875rem"
+            style="
+              padding: 1rem;
+              font-size: 1rem;
+              font-weight: 700;
+              margin-top: 0.5rem;
+            "
           >
             ログイン
           </button>
@@ -227,34 +237,81 @@
 
         <div
           style="
-            margin-top: 2rem;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 1.5rem;
+            margin: 2.5rem 0;
             text-align: center;
+            position: relative;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
           "
         >
-          <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 1rem">
-            または Google アカウントでログイン
-          </p>
-          <button
-            id="google-login-btn"
-            class="btn"
+          <span
             style="
-              width: 100%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 0.5rem;
-              background: white;
-              border: 1px solid #e2e8f0;
-              font-size: 0.875rem;
+              background: rgba(255, 255, 255, 0.95);
+              padding: 0 1.25rem;
+              position: relative;
+              z-index: 1;
             "
+            >または</span
           >
-            Googleでログイン
-          </button>
+          <div
+            style="
+              position: absolute;
+              top: 50%;
+              left: 0;
+              right: 0;
+              border-top: 1px solid #e2e8f0;
+            "
+          ></div>
         </div>
+
+        <button
+          id="google-login-btn"
+          style="
+            width: 100%;
+            padding: 0.875rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          "
+          onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1)'"
+          onmouseout="this.style.background='white'; this.style.borderColor='#e2e8f0'; this.style.transform='none'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.05)'"
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            width="20"
+            height="20"
+          />
+          Google でサインイン
+        </button>
       </div>
     </div>
+
+    <!-- アニメーション定義 -->
+    <style>
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
 
     <script type="module" src="./admin.js"></script>
   </body>
