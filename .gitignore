@@ -1,7 +1,17 @@
 node_modules/
 dist/
-.env
+.firebase/
+.env*
 *.log
-note/hackathon.mp4
+note/
 test-results/
 .DS_Store
+
+# Firebase
+firebase-debug.log*
+firestore-debug.log*
+pubsub-debug.log*
+ui-debug.log*
+
+# Functions
+functions/node_modules/
