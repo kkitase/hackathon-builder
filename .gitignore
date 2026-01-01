@@ -15,3 +15,6 @@ ui-debug.log*
 
 # Functions
 functions/node_modules/
+
+# セキュリティ (サービスアカウントキー)
+serviceAccountKey.json

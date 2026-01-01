@@ -35,26 +35,26 @@ firebase projects:create <PROJECT_ID> --title "My Hackathon"
 firebase apps:create WEB "Hackathon Web"
 ```
 
-### 2. コンソールでの有効化 (手動操作)
-以下の設定は [Firebase Console](https://console.firebase.google.com/) で直接行う必要があります。
+### 2. コンソールでの有効化 (最小限の手動操作)
+以下の 2 つだけは [Firebase Console](https://console.firebase.google.com/) で行ってください。
 
-1. **Firestore**: 「開始」を押し、東京 (`asia-northeast1`) などのリージョンを選択して作成します。
-2. **Authentication**: 「使ってみる」から **Google** を有効化してください。
-3. **初期管理者の登録**: Firestore で `config/admin` ドキュメントを作成し、以下のフィールドを追加します。
-   - `defaultUser`: `your_id`
-   - `defaultPass`: `your_password`
-   - `authorizedEmails`: `["your-email@gmail.com"]` (配列形式)
+1. **Firestore**: 「開始」→ 東京 (`asia-northeast1`) を選択して作成。
+2. **Authentication**: 「使ってみる」→ **Google** を有効化。
+3. **サービスアカウントキーの取得**: プロジェクト設定 → サービスアカウント → 「新しい秘密鍵の生成」→ ダウンロードしたファイルを `serviceAccountKey.json` としてプロジェクトルートに配置。
 
-### 3. コードの設定とデプロイ
+### 3. セットアップとデプロイ
 ```bash
-# 4. Firebase 設定情報 (Config) の取得
+# 4. Firebase 設定情報の取得と firebase.js への反映
 firebase apps:sdkconfig WEB
+# 出力された config を firebase.js に貼り付け
 
-# 5. firebase.js の更新
-# 上記で取得した config オブジェクトの内容を firebase.js に貼り付けてください。
-
-# 6. インストールとデプロイ
+# 5. 依存関係のインストール
 npm install
+
+# 6. 管理者アカウントのセットアップ (対話式)
+npm run setup
+
+# 7. ビルドとデプロイ
 npm run build && firebase deploy
 ```
 
