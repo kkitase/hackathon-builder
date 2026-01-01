@@ -32,9 +32,9 @@ Firebase と SSR (Server Side Rendering) を活用した、チラつきのない
 
 1. Firestore 内に `config` コレクションを作成します。
 2. その中に `admin` という ID のドキュメントを手動作成し、以下のフィールドを追加します。
-   - `defaultUser`: `antigravity` (ID/Pass ログイン用)
-   - `defaultPass`: `JetSki#555` (ID/Pass ログイン用)
-   - `authorizedEmails`: `[あなたのメールアドレス]` (Google ログイン許可リスト、配列形式)
+   - `defaultUser`: `your_id` (好きなID)
+   - `defaultPass`: `your_password` (安全なパスワード)
+   - `authorizedEmails`: `["admin@example.com", "staff1@example.com", "staff2@example.com"]` (配列形式で3つなど指定可能)
 
 ### 3. コードの設定
 1. `firebase.js` を開き、メモした設定値で `firebaseConfig` を上書きします。
