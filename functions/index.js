@@ -1,4 +1,4 @@
-const functions = require("firebase-functions");
+const { onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const fs = require("fs");
 const path = require("path");
@@ -12,8 +12,8 @@ const defaultHeroData = {
     "未来を創るAIエージェントの競演。Google Cloudのパワーを使い、次世代のソリューションを開発せよ。",
 };
 
-// OGP SSR Function
-exports.ssr = functions.https.onRequest(async (req, res) => {
+// OGP SSR Function (東京リージョン)
+exports.ssr = onRequest({ region: "asia-northeast1" }, async (req, res) => {
   try {
     // robots.txt のリクエストを処理 (Hosting 経由 / 直アクセス両対応)
     const normalizedPath = (req.path || req.url || "").split("?")[0];
