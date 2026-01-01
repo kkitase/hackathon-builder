@@ -40,7 +40,7 @@ firebase apps:create WEB "Hackathon Web"
 
 1. **Firestore**: 「開始」→ 東京 (`asia-northeast1`) を選択して作成。
 2. **Authentication**: 「使ってみる」→ **Google** を有効化。
-3. **サービスアカウントキーの取得**: プロジェクト設定 → サービスアカウント → 「新しい秘密鍵の生成」→ ダウンロードしたファイルを `serviceAccountKey.json` としてプロジェクトルートに配置。
+3. **サービスアカウントキーの取得**: プロジェクト → プロジェクト設定 → サービスアカウント → 「新しい秘密鍵の生成」→ ダウンロードしたファイルを `serviceAccountKey.json` としてプロジェクトルートに配置。
 
 ### 3. セットアップとデプロイ
 ```bash
@@ -64,7 +64,7 @@ npm run build && firebase deploy
 
 - **管理画面**: デプロイされたURLの `/admin.html` にアクセスしてください。
 - **ログイン**: 
-  - **ID/Pass**: `antigravity` / `JetSki#555` (初期設定時)
+  - **ID/Pass**: `初期設定時の userid` / `password` (初期設定時)
   - **Google**: 手動登録したメールアドレスでサインイン可能。
 - **更新**: 各タブの内容を編集して「保存」を押すと、即座に公開サイトに反映されます。
 - **ログアウト**: サイドバーの「Logout」ボタンから安全にログアウトできます。
