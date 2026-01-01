@@ -101,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
       title: "",
       subtitle: "",
       ctaText: "",
-      notice: "",
     },
     overview: {
       title: "",

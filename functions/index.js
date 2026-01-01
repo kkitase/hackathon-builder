@@ -10,7 +10,6 @@ const defaultHeroData = {
   title: "第3回 AI Agent Hackathon with Google Cloud",
   subtitle:
     "未来を創るAIエージェントの競演。Google Cloudのパワーを使い、次世代のソリューションを開発せよ。",
-  notice: "本イベントの申し込み期間は終了しました",
 };
 
 // OGP SSR Function
