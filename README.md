@@ -96,6 +96,9 @@ npm install
 ```bash
 # 対話式で管理者ID、パスワード、許可メールアドレスを入力
 npm run setup
+
+# (任意) デモデータの投入
+npm run demo-data
 ```
 
 #### 3.5 ビルドとデプロイ
