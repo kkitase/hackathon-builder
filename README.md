@@ -44,17 +44,26 @@ firebase apps:create WEB "Hackathon Web"
 
 ### 3. セットアップとデプロイ
 ```bash
-# 4. Firebase 設定情報の取得と firebase.js への反映
+# 4. Firebase 設定ファイルの作成
+#    テンプレートをコピーして firebase.js を作成します
+cp firebase.js.example firebase.js
+
+# 5. Firebase 設定情報の取得と反映
+#    以下のコマンドで apiKey, authDomain などの設定情報が出力されます
 firebase apps:sdkconfig WEB
-# 出力された config を firebase.js に貼り付け
+#    ↑ 出力された firebaseConfig オブジェクトを firebase.js にコピー＆ペーストしてください
 
 # 5. 依存関係のインストール
+#    Node.js パッケージ（Firebase SDK など）をインストールします
 npm install
 
-# 6. 管理者アカウントのセットアップ (対話式)
+# 6. 管理者アカウントのセットアップ
+#    対話式で管理者ID、パスワード、許可メールアドレスを入力します
+#    入力した情報は Firestore の config/admin に保存されます
 npm run setup
 
 # 7. ビルドとデプロイ
+#    フロントエンドをビルドし、Firebase Hosting と Cloud Functions にデプロイします
 npm run build && firebase deploy
 ```
 

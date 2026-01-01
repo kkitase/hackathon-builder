@@ -55,7 +55,9 @@ async function main() {
 
   const defaultUser = await question("管理者 ID (例: admin): ");
   const defaultPass = await question("管理者パスワード: ");
-  const emailsInput = await question("許可するメールアドレス (カンマ区切り): ");
+  const emailsInput = await question(
+    "許可するメールアドレス (カンマ区切り, 例: admin@gmail.com, staff@gmail.com): "
+  );
 
   const authorizedEmails = emailsInput
     .split(",")

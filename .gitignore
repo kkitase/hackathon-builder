@@ -19,3 +19,6 @@ functions/node_modules/
 # セキュリティ (サービスアカウントキー)
 serviceAccountKey.json
 *-firebase-adminsdk-*.json
+
+# Firebase 設定ファイル (API キー含む)
+firebase.js
