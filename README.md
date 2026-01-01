@@ -19,30 +19,42 @@ Firebase と SSR (Server Side Rendering) を活用した、チラつきのない
 
 ---
 
-## 🚀 構築・公開手順 (15分)
+## 🚀 構築・公開手順 (10分)
 
-### 1. Firebase プロジェクトの準備
-1. [Firebase Console](https://console.firebase.google.com/) でプロジェクトを作成します。
-2. **Firestore** を「開始」し、東京 (asia-northeast1) など適切なリージョンを選択します。
-3. **Authentication** を有効にし、Google ログインを許可します。
-4. プロジェクト設定からウェブアプリを追加し、`firebaseConfig` をメモします。
+### 1. Firebase プロジェクトの作成と設定
+CLI を使用して、プロジェクトの枠組みを迅速に作成します。
 
-### 2. 初期データのセットアップ (重要)
-セキュリティ保護のため、最初の管理者は Firebase コンソールから手動で登録してください。
-
-1. Firestore 内に `config` コレクションを作成します。
-2. その中に `admin` という ID のドキュメントを手動作成し、以下のフィールドを追加します。
-   - `defaultUser`: `your_id` (好きなID)
-   - `defaultPass`: `your_password` (安全なパスワード)
-   - `authorizedEmails`: `["admin@example.com", "staff1@example.com", "staff2@example.com"]` (配列形式で3つなど指定可能)
-
-### 3. コードの設定
-1. `firebase.js` を開き、メモした設定値で `firebaseConfig` を上書きします。
-2. `npm install` で依存関係をインストールします。
-
-### 4. デプロイ（公開）
 ```bash
-# 組み立てと公開
+# 1. ログイン
+firebase login
+
+# 2. プロジェクトの作成 (IDは任意、小文字/数字/ハイフン)
+firebase projects:create <PROJECT_ID> --title "My Hackathon"
+
+# 3. Webアプリの登録
+firebase apps:create WEB "Hackathon Web"
+```
+
+### 2. コンソールでの有効化 (手動操作)
+以下の設定は [Firebase Console](https://console.firebase.google.com/) で直接行う必要があります。
+
+1. **Firestore**: 「開始」を押し、東京 (`asia-northeast1`) などのリージョンを選択して作成します。
+2. **Authentication**: 「使ってみる」から **Google** を有効化してください。
+3. **初期管理者の登録**: Firestore で `config/admin` ドキュメントを作成し、以下のフィールドを追加します。
+   - `defaultUser`: `your_id`
+   - `defaultPass`: `your_password`
+   - `authorizedEmails`: `["your-email@gmail.com"]` (配列形式)
+
+### 3. コードの設定とデプロイ
+```bash
+# 4. Firebase 設定情報 (Config) の取得
+firebase apps:sdkconfig WEB
+
+# 5. firebase.js の更新
+# 上記で取得した config オブジェクトの内容を firebase.js に貼り付けてください。
+
+# 6. インストールとデプロイ
+npm install
 npm run build && firebase deploy
 ```
 
