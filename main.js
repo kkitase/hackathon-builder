@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const heroContent = document.querySelector(".hero-content");
     const heroTitle = document.getElementById("hero-title");
     const heroSubtitle = document.getElementById("hero-subtitle");
-    const heroNotice = document.getElementById("hero-notice");
+    const heroCta = document.getElementById("hero-cta");
 
     // Firestore からコンテンツを取得
     const content = await getContentFromFirestore();
@@ -415,8 +415,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (heroSubtitle) {
       heroSubtitle.textContent = hero.subtitle || defaultHeroData.subtitle;
     }
-    if (heroNotice) {
-      heroNotice.textContent = hero.notice || defaultHeroData.notice;
+    // CTA ボタン（テキストが設定されている場合のみ表示）
+    if (heroCta) {
+      if (hero.ctaText) {
+        heroCta.textContent = hero.ctaText;
+        heroCta.style.display = "inline-block";
+      } else {
+        heroCta.style.display = "none";
+      }
     }
 
     // データ読み込み完了後にヒーローコンテンツを表示
@@ -512,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
     await loadHeroData();
     await loadSocialData();
     // 最初のタブを表示（審査員がデフォルト）
-    await switchTab("judges");
+    await switchTab("overview");
   })();
 
   // Add scroll effect to header

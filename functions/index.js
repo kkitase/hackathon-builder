@@ -48,7 +48,7 @@ exports.ssr = functions.https.onRequest(async (req, res) => {
         /{{HERO_SUBTITLE}}/g,
         heroData.subtitle || defaultHeroData.subtitle
       )
-      .replace(/{{HERO_NOTICE}}/g, heroData.notice || defaultHeroData.notice);
+      .replace(/{{HERO_CTA}}/g, heroData.ctaText || "");
 
     // 6. 完成した HTML を返却
     res.set("Cache-Control", "public, max-age=600, s-maxage=1200");
