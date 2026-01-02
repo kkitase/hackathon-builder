@@ -25,6 +25,24 @@ import {
 } from "firebase/firestore";
 import { checkIsAdmin } from "./auth-utils.js";
 
+// ステータス表示名のマッピング
+const getStatusLabel = (status) => {
+  if (!status) return "";
+  const labels = {
+    pending: "書類確認中",
+    accept: "受付完了",
+    "1st_review": "一次審査中",
+    "2nd_review": "二次審査中",
+    finalist: "ファイナリスト",
+    award_winner: "入賞者",
+    rejected: "落選",
+    withdrawn: "辞退",
+    others: "その他",
+  };
+  // マッピングにある場合はそれを返し、ない場合はそのまま（既に日本語の場合など）を返す
+  return labels[status] || status;
+};
+
 // タブコンテンツのフォールバック（Firestore にデータがない場合のみ表示）
 const defaultTabData = {
   overview: `
@@ -199,13 +217,22 @@ const renderProjectList = async () => {
         ? "2px solid var(--primary)"
         : "1px solid var(--border)";
 
+      const statusLabel = getStatusLabel(p.status);
+
       card.innerHTML = `
         <div class="judge-info" style="padding: 1.5rem;">
-          ${
-            isMine
-              ? '<span style="display: inline-block; padding: 0.25rem 0.75rem; background: var(--grad-main); color: white; border-radius: 99px; font-size: 0.75rem; font-weight: 800; margin-bottom: 1rem;">あなたのプロジェクト</span>'
-              : ""
-          }
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
+            ${
+              isMine
+                ? '<span style="display: inline-block; padding: 0.25rem 0.75rem; background: var(--grad-main); color: white; border-radius: 99px; font-size: 0.75rem; font-weight: 800;">あなたのプロジェクト</span>'
+                : ""
+            }
+            ${
+              statusLabel
+                ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background: #ef4444; color: white; border-radius: 99px; font-size: 0.75rem; font-weight: 800;">${statusLabel}</span>`
+                : ""
+            }
+          </div>
           <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem; color: var(--text-main);">${
             p.projectName || "プロジェクト名"
           }</h3>
@@ -378,6 +405,18 @@ const openRegisterModalForEdit = (data) => {
     // メールアドレスは変更不可にする（主キーのため）
     form.email.readOnly = true;
     form.email.style.background = "#f1f5f9";
+
+    // ステータスバッジの表示
+    const statusBadge = document.getElementById("register-modal-status");
+    if (statusBadge) {
+      const statusLabel = getStatusLabel(data.status);
+      if (statusLabel) {
+        statusBadge.textContent = statusLabel;
+        statusBadge.style.display = "inline-flex";
+      } else {
+        statusBadge.style.display = "none";
+      }
+    }
   }
 
   registerModal.style.display = "flex";

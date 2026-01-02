@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db, storage } from "./firebase.js";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   doc,
@@ -339,6 +339,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // フォーム入力監視
   const markChanged = () => {
+    // 即時保存が行われるタブではグローバルの「未保存の変更」フラグを立てない
+    if (currentTab === "projects" || currentTab === "admins") return;
     hasChanges = true;
     updateSaveButtonState();
   };
@@ -523,15 +525,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 }</textarea>
             </div>
             <div class="form-group">
-                <label>SNS用画像 (og:image) URL</label>
+                <label>SNS用画像 (og:image) URL / アップロード</label>
                 <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem;">
-                    <input type="text" class="form-input" id="field-social-image" value="${
-                      s.ogImage
-                    }" placeholder="https://example.com/image.jpg" />
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="form-input" id="field-social-image" value="${
+                          s.ogImage
+                        }" placeholder="https://example.com/image.jpg" />
+                        <label class="btn" style="background: var(--grad-main); color: white; cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center;">
+                            アップロード
+                            <input type="file" id="field-social-image-file" accept="image/*" style="display: none;" />
+                        </label>
+                    </div>
                     <div class="social-image-preview" style="width: 240px; height: 126px; border-radius: 0.5rem; background: #e2e8f0; background-image: url('${
                       s.ogImage
                     }'); background-size: cover; background-position: center; border: 1px solid var(--border); flex-shrink: 0;"></div>
-                    <p style="font-size: 0.75rem; color: var(--text-muted);">1200x630px 推奨。画像の直接リンクを入力してください。</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">1200x630px 推奨。ファイルをアップロードすると自動的に URL がセットされます。</p>
                 </div>
             </div>
             <div class="form-group" style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1rem;">
@@ -616,11 +624,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const socialInput = document.getElementById("field-social-image-file");
     if (socialInput) {
-      handleImageUpload(
-        socialInput,
-        "field-social-image",
-        "social-image-preview"
-      );
+      socialInput.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const { ref, uploadBytes, getDownloadURL } = await import(
+          "firebase/storage"
+        );
+        const fileName = `ogp/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, fileName);
+
+        const statusLabel = e.target.parentElement;
+        const originalText = statusLabel.textContent;
+        statusLabel.textContent = "アップ中...";
+        statusLabel.style.pointerEvents = "none";
+
+        try {
+          const snapshot = await uploadBytes(storageRef, file);
+          const downloadURL = await getDownloadURL(snapshot.ref);
+
+          const urlInput = document.getElementById("field-social-image");
+          const preview = document.querySelector(".social-image-preview");
+
+          if (urlInput) urlInput.value = downloadURL;
+          if (preview) preview.style.backgroundImage = `url('${downloadURL}')`;
+
+          markChanged();
+          statusLabel.textContent = "完了！";
+          setTimeout(() => {
+            statusLabel.textContent = originalText;
+            statusLabel.style.pointerEvents = "auto";
+          }, 2000);
+        } catch (err) {
+          console.error("Upload failed:", err);
+          alert("アップロードに失敗しました。");
+          statusLabel.textContent = originalText;
+          statusLabel.style.pointerEvents = "auto";
+        }
+      });
     }
 
     // 画像アップロードの処理
@@ -951,6 +992,11 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.add("active");
       currentTab = btn.getAttribute("data-target");
       pageTitle.textContent = `${btn.textContent}の編集`;
+
+      // タブ切り替え時に「未保存の変更」フラグをリセット
+      hasChanges = false;
+      updateSaveButtonState();
+
       await renderForm(currentTab);
     });
   });
@@ -1132,15 +1178,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const statusLabels = {
-        pending: "未確認",
-        accept: "受付完了",
-        "1st_review": "一次審査中",
-        "2nd_review": "二次審査中",
-        finalist: "ファイナリスト",
-        award_winner: "入賞者",
-        rejected: "落選",
-        withdrawn: "辞退",
-        others: "その他",
+        書類確認中: "書類確認中",
+        受付完了: "受付完了",
+        一次審査中: "一次審査中",
+        二次審査中: "二次審査中",
+        ファイナリスト: "ファイナリスト",
+        入賞者: "入賞者",
+        落選: "落選",
+        辞退: "辞退",
+        その他: "その他",
       };
 
       let html = `
@@ -1249,6 +1295,16 @@ document.addEventListener("DOMContentLoaded", () => {
               updatedAt: serverTimestamp(),
             });
             console.log(`Status updated for ${id}: ${newStatus}`);
+
+            // 即時保存の成功を表示
+            saveStatus.textContent = "保存しました！";
+            saveStatus.style.color = "#10b981";
+            setTimeout(() => {
+              if (!hasChanges) {
+                saveStatus.textContent = "保存済み";
+                saveStatus.style.color = "#10b981";
+              }
+            }, 2000);
           } catch (err) {
             console.error("Status update failed:", err);
             alert("ステータスの更新に失敗しました。");

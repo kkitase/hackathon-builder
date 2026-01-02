@@ -28,8 +28,8 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="/assets/main-BM-qDjxq.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/auth-utils-Dvj4FsVP.js">
+    <script type="module" crossorigin src="/assets/main-BKLMnBLZ.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/auth-utils-CN2HrOz1.js">
     <link rel="stylesheet" crossorigin href="/assets/auth-utils-BsFOtOlb.css">
   </head>
   <body>
@@ -138,9 +138,34 @@
     <div id="register-modal" class="modal" style="display: none">
       <div class="modal-overlay"></div>
       <div class="modal-content">
-        <div class="modal-header">
-          <h2 id="register-modal-title">ハッカソン参加登録</h2>
-          <button class="modal-close" id="register-modal-close">&times;</button>
+        <div
+          class="modal-header"
+          style="justify-content: space-between; align-items: center"
+        >
+          <div style="display: flex; align-items: center; gap: 1rem">
+            <h2 id="register-modal-title" style="margin: 0">
+              ハッカソン参加登録
+            </h2>
+            <span
+              id="register-modal-status"
+              style="
+                display: none;
+                padding: 0.25rem 0.75rem;
+                background: #ef4444;
+                color: white;
+                border-radius: 99px;
+                font-size: 0.75rem;
+                font-weight: 800;
+              "
+            ></span>
+          </div>
+          <button
+            class="modal-close"
+            id="register-modal-close"
+            style="margin: 0"
+          >
+            &times;
+          </button>
         </div>
         <form id="register-form" class="register-form">
           <div class="form-row">
