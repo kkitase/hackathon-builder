@@ -14,9 +14,13 @@ Firebase と SSR (Server Side Rendering) を活用した、チラつきのない
 
 ## 🏗 システム構成
 
-管理者が保存したデータを元に、Cloud Functions (SSR) がページ生成を行います。これにより、従来の SPA で見られた「一瞬白い画面が出る」「データが後から降ってくる」といったチラつきを完全に排除しました。
+**Hackathon Builder** は、Firebase をフル活用したモダンな高パフォーマンス・アーキテクチャを採用しています。
 
-![システム構成](./assets/detailed_technical_flow.png)
+- **SSR (Server Side Rendering)**: Cloud Functions がリクエストを受け取り、Firestore の最新データや Storage の画像を注入した HTML を即座に生成します。これにより、爆速の初回表示と、SNS シェア時の完璧な OGP 対応を実現しています。
+- **統合管理**: 構造化データは **Cloud Firestore**、OGP 画像などのアセットは **Firebase Storage** で一元管理され、管理画面からシームレスに操作可能です。
+- **セキュリティ**: すべての操作は Firebase Auth による認証と、強固なセキュリティルールによって適切に制御されています。
+
+![システム構成](./assets/hackathon_builder_system_arch.png)
 
 ---
 
