@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const generatePrizesHtml = (items) => `
         <div class="fade-in">
             <h2 style="font-size: 1.75rem; margin-bottom: 2rem;">プライズ</h2>
-            <div style="display: grid; gap: 1.5rem;">
+            <div class="judge-grid">
                 ${items
                   .map(
                     (p) => `
@@ -267,7 +267,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h3 style="color: var(--primary); margin-bottom: 0.5rem;">${
                       p.title
                     }</h3>
-                    <div>${parseMarkdown(p.description)}</div>
+                    <div style="font-size: 0.9375rem; line-height: 1.6;">${parseMarkdown(
+                      p.description
+                    )}</div>
                 </div>`
                   )
                   .join("")}
@@ -340,6 +342,9 @@ document.addEventListener("DOMContentLoaded", () => {
     hasChanges = true;
     updateSaveButtonState();
   };
+
+  formContainer.addEventListener("input", markChanged);
+  formContainer.addEventListener("change", markChanged);
 
   // フォームをレンダリング
   const renderForm = async (tabName) => {
@@ -600,10 +605,10 @@ document.addEventListener("DOMContentLoaded", () => {
       .querySelectorAll(".field-avatar-file")
       .forEach((input) => handleImageUpload(input, "", "avatar-preview"));
 
-    // 参加者リストの表示制御
-    if (tabName === "participants") {
+    // プロジェクト（旧参加者）リストの表示制御
+    if (tabName === "projects") {
       renderParticipantsList();
-      // 参加者タブでは標準の保存・リセットボタンを非表示にする
+      // プロジェクトタブでは標準の保存・リセットボタンを非表示にする（管理動線が異なるため）
       document.querySelector(".admin-actions").style.display = "none";
     } else {
       document.querySelector(".admin-actions").style.display = "flex";

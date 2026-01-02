@@ -337,6 +337,77 @@
       </div>
     </div>
 
+    <!-- コメント表示・投稿モーダル -->
+    <div id="comment-modal" class="modal" style="display: none">
+      <div class="modal-overlay"></div>
+      <div
+        class="modal-content"
+        style="max-width: 500px; padding: 0; overflow: hidden"
+      >
+        <div
+          class="modal-header"
+          style="border-bottom: 1px solid var(--border)"
+        >
+          <h2 id="comment-modal-title" style="font-size: 1.125rem">コメント</h2>
+          <button id="comment-modal-close" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.25rem">
+          <div id="comment-list">
+            <!-- コメントがここに動的に追加されます -->
+          </div>
+
+          <div class="comment-input-area">
+            <div class="comment-avatar" id="current-user-comment-avatar">?</div>
+            <textarea
+              id="comment-text"
+              class="comment-textarea"
+              placeholder="コメントを入力..."
+              rows="1"
+            ></textarea>
+            <button
+              id="submit-comment-btn"
+              class="btn btn-primary comment-submit-btn"
+              disabled
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path
+                  d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- いいねしたユーザー一覧モーダル -->
+    <div id="like-list-modal" class="modal" style="display: none">
+      <div class="modal-overlay"></div>
+      <div
+        class="modal-content"
+        style="max-width: 400px; padding: 0; overflow: hidden"
+      >
+        <div
+          class="modal-header"
+          style="border-bottom: 1px solid var(--border)"
+        >
+          <h2 style="font-size: 1.125rem">いいねした人</h2>
+          <button id="like-list-modal-close" class="modal-close">
+            &times;
+          </button>
+        </div>
+        <div
+          class="modal-body"
+          style="padding: 0; max-height: 400px; overflow-y: auto"
+        >
+          <div id="like-user-list">
+            <!-- ユーザーリストがここに動的に追加されます -->
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer
       style="
         background: var(--surface);

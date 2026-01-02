@@ -15,6 +15,13 @@ import {
   updateDoc,
   query,
   orderBy,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  addDoc,
+  onSnapshot,
+  where,
+  documentId,
 } from "firebase/firestore";
 import { checkIsAdmin } from "./auth-utils.js";
 
@@ -231,7 +238,7 @@ const renderProjectList = async () => {
               }
             </p>
           </div>
-          <div style="display: flex; gap: 1rem; align-items: center;">
+          <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
             ${
               p.slideUrl
                 ? `<a href="${p.slideUrl}" target="_blank" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">スライドを見る</a>`
@@ -239,9 +246,35 @@ const renderProjectList = async () => {
             }
             ${
               isMine
-                ? `<button id="edit-my-project-btn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">編集する</button>`
+                ? `<button class="btn btn-primary edit-my-project-btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">編集する</button>`
                 : ""
             }
+          </div>
+
+          <div class="project-stats" id="stats-${p.id}">
+            <div class="stat-item">
+              <span id="like-count-${p.id}">${p.likeCount || 0}人がいいね</span>
+            </div>
+            <div class="stat-item">
+              <span id="comment-count-${p.id}">コメント ${
+        p.commentCount || 0
+      }件</span>
+            </div>
+          </div>
+
+          <div class="project-actions">
+            <button class="action-btn like-btn ${
+              user && p.likes?.includes(user.email) ? "active" : ""
+            }" data-id="${p.id}">
+              <span>${
+                user && p.likes?.includes(user.email)
+                  ? "👍 いいね済み"
+                  : "👍 いいね！"
+              }</span>
+            </button>
+            <button class="action-btn comment-btn" data-id="${p.id}">
+              <span>💬 コメントする</span>
+            </button>
           </div>
         </div>
       `;
@@ -256,16 +289,51 @@ const renderProjectList = async () => {
       }, 50 * index);
 
       if (isMine) {
-        card.querySelector("#edit-my-project-btn").onclick = () => {
-          openRegisterModalForEdit(p);
+        const editBtn = card.querySelector(".edit-my-project-btn");
+        if (editBtn) {
+          editBtn.onclick = () => {
+            openRegisterModalForEdit(p);
+          };
+        }
+      }
+
+      // いいね数ボタン
+      const likeCountText = card.querySelector(
+        `#like-count-${CSS.escape(p.id)}`
+      );
+      if (likeCountText) {
+        likeCountText.onclick = () => {
+          openLikeListModal(p.id);
         };
       }
+
+      // いいねボタン
+      card.querySelector(".like-btn").onclick = (e) => {
+        const docId = e.currentTarget.getAttribute("data-id");
+        toggleLike(docId);
+      };
+
+      // コメント数ボタン
+      const commentCountText = card.querySelector(
+        `#comment-count-${CSS.escape(p.id)}`
+      );
+      if (commentCountText) {
+        commentCountText.onclick = () => {
+          openCommentModal(p.id, p.projectName || p.teamName);
+        };
+      }
+
+      // コメントボタン
+      card.querySelector(".comment-btn").onclick = (e) => {
+        const docId = e.currentTarget.getAttribute("data-id");
+        openCommentModal(docId, p.projectName || p.teamName);
+      };
     });
   } catch (error) {
-    console.error("Project list error:", error);
+    console.error("Project list rendering error:", error);
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: #fee2e2; border-radius: 1rem; border: 1px solid #f87171; color: #b91c1c;">
-        <p>プロジェクト一覧の取得に失敗しました。認証状態を確認してください。</p>
+        <p>プロジェクト一覧の表示に失敗しました。ブラウザのコンソールで詳細を確認してください。</p>
       </div>
     `;
   }
@@ -314,6 +382,255 @@ const openRegisterModalForEdit = (data) => {
 
   registerModal.style.display = "flex";
   document.body.style.overflow = "hidden";
+};
+
+// ======================
+// いいね・コメント ロジック
+// ======================
+
+// いいねトグル
+const toggleLike = async (docId) => {
+  const user = auth.currentUser;
+  if (!user) {
+    showSignInModal();
+    return;
+  }
+
+  const docRef = doc(db, "participants", docId);
+  try {
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return;
+
+    const data = docSnap.data();
+    const likes = data.likes || [];
+    const isLiked = likes.includes(user.email);
+
+    if (isLiked) {
+      await updateDoc(docRef, {
+        likes: arrayRemove(user.email),
+        likeCount: increment(-1),
+      });
+    } else {
+      await updateDoc(docRef, {
+        likes: arrayUnion(user.email),
+        likeCount: increment(1),
+      });
+    }
+
+    // UIの即時更新（再レンダリングを待たずに数字を変える）
+    const countSpan = document.getElementById(`like-count-${docId}`);
+    const likeBtn = document.querySelector(
+      `.like-btn[data-id="${CSS.escape(docId)}"]`
+    );
+    if (countSpan) {
+      const currentCount = parseInt(countSpan.textContent) || 0;
+      countSpan.textContent = `${
+        isLiked ? currentCount - 1 : currentCount + 1
+      }人がいいね`;
+    }
+    if (likeBtn) {
+      likeBtn.classList.toggle("active");
+      const span = likeBtn.querySelector("span");
+      if (span) {
+        span.textContent = isLiked ? "👍 いいね！" : "👍 いいね済み";
+      }
+    }
+  } catch (error) {
+    console.error("Like error:", error);
+  }
+};
+
+let activeDocId = null;
+let commentUnsubscribe = null;
+
+// コメントモーダルを開く
+const openCommentModal = (docId, projectName) => {
+  activeDocId = docId;
+  const modal = document.getElementById("comment-modal");
+  const title = document.getElementById("comment-modal-title");
+  const commentList = document.getElementById("comment-list");
+  const userAvatar = document.getElementById("current-user-comment-avatar");
+
+  if (title) title.textContent = `${projectName} へのコメント`;
+  if (commentList)
+    commentList.innerHTML = '<p class="text-muted">読み込み中...</p>';
+
+  // 自分のアバター設定
+  if (userAvatar && auth.currentUser) {
+    userAvatar.textContent = auth.currentUser.displayName
+      ? auth.currentUser.displayName.charAt(0)
+      : "?";
+  }
+
+  // リアルタイム更新の購読
+  if (commentUnsubscribe) commentUnsubscribe();
+  const q = query(
+    collection(db, "participants", docId, "comments"),
+    orderBy("createdAt", "asc")
+  );
+
+  commentUnsubscribe = onSnapshot(q, (snapshot) => {
+    if (commentList) {
+      if (snapshot.empty) {
+        commentList.innerHTML =
+          '<p class="text-muted" style="text-align: center; padding: 1rem;">まだコメントはありません</p>';
+      } else {
+        commentList.innerHTML = "";
+        snapshot.forEach((doc) => {
+          const c = doc.data();
+          const div = document.createElement("div");
+          div.className = "comment-item";
+          const initial = c.userName ? c.userName.charAt(0) : "?";
+          const date = c.createdAt
+            ? new Date(c.createdAt.toDate()).toLocaleString()
+            : "たった今";
+
+          div.innerHTML = `
+            <div class="comment-avatar">${initial}</div>
+            <div class="comment-bubble">
+              <div class="comment-user-info">
+                <span class="comment-user">${c.userName || "ユーザー"}</span>
+                ${
+                  c.company
+                    ? `<span class="comment-user-org">${c.company} ${
+                        c.role || ""
+                      }</span>`
+                    : ""
+                }
+              </div>
+              <div class="comment-content">${c.content}</div>
+              <div class="comment-date">${date}</div>
+            </div>
+          `;
+          commentList.appendChild(div);
+        });
+        // 最下部へスクロール
+        commentList.scrollTop = commentList.scrollHeight;
+      }
+    }
+  });
+
+  if (modal) modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+};
+
+// いいねしたユーザー一覧を表示
+const openLikeListModal = async (docId) => {
+  const modal = document.getElementById("like-list-modal");
+  const listContainer = document.getElementById("like-user-list");
+  if (!modal || !listContainer) return;
+
+  listContainer.innerHTML =
+    '<div style="padding: 2rem; text-align: center;"><p class="text-muted">読み込み中...</p></div>';
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+
+  try {
+    const docRef = doc(db, "participants", docId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return;
+
+    const data = docSnap.data();
+    const emails = data.likes || [];
+
+    if (emails.length === 0) {
+      listContainer.innerHTML =
+        '<div style="padding: 2rem; text-align: center;"><p class="text-muted">まだいいねがありません</p></div>';
+      return;
+    }
+
+    // 30件まで一括取得 (Firestoreの limit)
+    const limitedEmails = emails.slice(0, 30);
+    const q = query(
+      collection(db, "participants"),
+      where(documentId(), "in", limitedEmails)
+    );
+    const querySnapshot = await getDocs(q);
+    const users = [];
+    querySnapshot.forEach((doc) => {
+      users.push(doc.data());
+    });
+
+    if (users.length === 0) {
+      listContainer.innerHTML =
+        '<div style="padding: 2rem; text-align: center;"><p class="text-muted">ユーザー情報が見つかりませんでした</p></div>';
+    } else {
+      listContainer.innerHTML = "";
+      users.forEach((u) => {
+        const initial = u.name ? u.name.charAt(0) : "?";
+        const div = document.createElement("div");
+        div.className = "like-user-item";
+        div.innerHTML = `
+          <div class="like-user-avatar">${initial}</div>
+          <div class="like-user-info">
+            <span class="like-user-name">${u.name || "匿名ユーザー"}</span>
+            <span class="like-user-org">${u.company || ""} ${
+          u.role || ""
+        }</span>
+          </div>
+        `;
+        listContainer.appendChild(div);
+      });
+
+      if (emails.length > 30) {
+        const moreDiv = document.createElement("div");
+        moreDiv.style.padding = "1rem";
+        moreDiv.style.textAlign = "center";
+        moreDiv.style.fontSize = "0.875rem";
+        moreDiv.style.color = "var(--text-muted)";
+        moreDiv.textContent = `他 ${emails.length - 30} 人`;
+        listContainer.appendChild(moreDiv);
+      }
+    }
+  } catch (error) {
+    console.error("Fetch likes users error:", error);
+    listContainer.innerHTML =
+      '<div style="padding: 2rem; text-align: center; color: #ef4444;">情報の取得に失敗しました</div>';
+  }
+};
+
+// コメント投稿
+const submitComment = async () => {
+  const user = auth.currentUser;
+  const commentText = document.getElementById("comment-text");
+  if (!user || !activeDocId || !commentText || !commentText.value.trim())
+    return;
+
+  const content = commentText.value.trim();
+  const docId = activeDocId;
+
+  try {
+    const commentData = {
+      userEmail: user.email,
+      userName: user.displayName || "匿名",
+      content: content,
+      createdAt: serverTimestamp(),
+    };
+
+    // 自分の参加者データがあれば会社名・役割を追加
+    if (currentUserParticipantData) {
+      commentData.company = currentUserParticipantData.company || "";
+      commentData.role = currentUserParticipantData.role || "";
+    }
+
+    await addDoc(
+      collection(db, "participants", docId, "comments"),
+      commentData
+    );
+
+    // コメント数を増やす
+    await updateDoc(doc(db, "participants", docId), {
+      commentCount: increment(1),
+    });
+
+    commentText.value = "";
+    commentText.style.height = "auto";
+    const submitBtn = document.getElementById("submit-comment-btn");
+    if (submitBtn) submitBtn.disabled = true;
+  } catch (error) {
+    console.error("Comment submit error:", error);
+    alert("コメントの投稿に失敗しました。");
+  }
 };
 
 // Auth Functions
@@ -1075,4 +1392,58 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  // コメントモーダル関連イベント
+  const commentModal = document.getElementById("comment-modal");
+  const commentModalClose = document.getElementById("comment-modal-close");
+  const commentText = document.getElementById("comment-text");
+  const submitCommentBtn = document.getElementById("submit-comment-btn");
+
+  if (commentModalClose) {
+    commentModalClose.onclick = () => {
+      if (commentModal) commentModal.style.display = "none";
+      document.body.style.overflow = "auto";
+      if (commentUnsubscribe) {
+        commentUnsubscribe();
+        commentUnsubscribe = null;
+      }
+    };
+  }
+
+  const likeListModal = document.getElementById("like-list-modal");
+  const likeListModalClose = document.getElementById("like-list-modal-close");
+
+  if (likeListModalClose) {
+    likeListModalClose.onclick = () => {
+      if (likeListModal) likeListModal.style.display = "none";
+      document.body.style.overflow = "auto";
+    };
+  }
+
+  window.onclick = (e) => {
+    const registerModal = document.getElementById("register-modal");
+    if (e.target === commentModal) {
+      if (commentModalClose) commentModalClose.click();
+    } else if (e.target === registerModal) {
+      closeRegisterModal();
+    } else if (e.target === likeListModal) {
+      if (likeListModalClose) likeListModalClose.click();
+    }
+  };
+
+  if (commentText) {
+    commentText.addEventListener("input", () => {
+      commentText.style.height = "auto";
+      commentText.style.height = commentText.scrollHeight + "px";
+      if (submitCommentBtn) {
+        submitCommentBtn.disabled = !commentText.value.trim();
+      }
+    });
+  }
+
+  if (submitCommentBtn) {
+    submitCommentBtn.onclick = () => {
+      submitComment();
+    };
+  }
 });

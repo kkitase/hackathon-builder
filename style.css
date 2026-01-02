@@ -612,7 +612,7 @@ header {
 /* Judge Content */
 .judge-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
 }
 
@@ -1017,11 +1017,224 @@ p[data-skeleton]:empty {
 /* ======================
    個人情報同意セクション
    ====================== */
-.consent-group {
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
+/* ======================
+   いいね・コメント機能
+   ====================== */
+.project-actions {
+  display: flex;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  padding-top: 0.5rem;
 }
 
-.consent-group label {
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.75rem 0.25rem;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.action-btn.active {
+  color: var(--primary);
+}
+
+.project-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[id^="like-count-"],
+[id^="comment-count-"] {
+  cursor: pointer;
+}
+
+[id^="like-count-"]:hover,
+[id^="comment-count-"]:hover {
+  text-decoration: underline;
+}
+
+.like-icons {
+  display: flex;
+  align-items: center;
+}
+
+.like-icon-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: white;
+  margin-right: -4px;
+  border: 2px solid var(--surface);
+}
+
+.like-icon-circle.like {
+  background: #3b82f6;
+}
+
+.like-icon-circle.heart {
+  background: #ef4444;
+}
+
+/* コメントモーダル用 */
+#comment-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+  padding-right: 0.5rem;
+}
+
+.comment-item {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.comment-bubble {
+  background-color: #f1f5f9;
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
   font-size: 0.9375rem;
+  max-width: 100%;
+}
+
+.comment-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.125rem;
+}
+
+.comment-user {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--text-main);
+}
+
+.comment-user-org {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.comment-content {
+  line-height: 1.5;
+}
+
+.comment-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.comment-input-area {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.comment-textarea {
+  flex: 1;
+  min-height: 40px !important;
+  max-height: 120px;
+  border-radius: 1.25rem !important;
+  background-color: #f1f5f9;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.comment-submit-btn {
+  padding: 0.5rem !important;
+  width: 40px;
+  height: 40px;
+  border-radius: 50% !important;
+}
+
+/* いいねユーザーリスト用 */
+.like-user-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.2s;
+}
+
+.like-user-item:last-child {
+  border-bottom: none;
+}
+
+.like-user-item:hover {
+  background-color: #f8fafc;
+}
+
+.like-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.like-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.like-user-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text-main);
+}
+
+.like-user-org {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
