@@ -99,7 +99,49 @@ async function main() {
     console.log("   ブラウザでログインしてください...");
     execShow("firebase login");
   } else {
-    success("Firebase にログイン済み");
+    // 現在のアカウントを表示
+    const accounts = loginStatus
+      .split("\n")
+      .filter((line) => line.includes("@"))
+      .map((line) => line.trim());
+
+    if (accounts.length > 0) {
+      console.log("\n   ログイン済みアカウント:");
+      accounts.forEach((acc, i) => console.log(`   ${i + 1}. ${acc}`));
+      console.log(`   0. 別のアカウントでログイン`);
+
+      const choice = await question(
+        "\n   使用するアカウント番号を選択 (Enter で現在のアカウント): "
+      );
+
+      if (choice === "0") {
+        console.log("   ブラウザでログインしてください...");
+        execShow("firebase login:add");
+        // 追加されたアカウントを使用
+        const newLoginStatus = exec("firebase login:list");
+        const newAccounts = newLoginStatus
+          .split("\n")
+          .filter((line) => line.includes("@"))
+          .map((line) => line.trim());
+        if (newAccounts.length > accounts.length) {
+          const newAccount = newAccounts[newAccounts.length - 1];
+          execShow(`firebase login:use ${newAccount}`);
+          success(`アカウント切り替え: ${newAccount}`);
+        }
+      } else if (
+        choice &&
+        parseInt(choice) >= 1 &&
+        parseInt(choice) <= accounts.length
+      ) {
+        const selectedAccount = accounts[parseInt(choice) - 1];
+        execShow(`firebase login:use ${selectedAccount}`);
+        success(`アカウント: ${selectedAccount}`);
+      } else {
+        success("Firebase にログイン済み");
+      }
+    } else {
+      success("Firebase にログイン済み");
+    }
   }
 
   // ===========================================
