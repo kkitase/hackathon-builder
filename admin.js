@@ -1178,15 +1178,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const statusLabels = {
-        書類確認中: "書類確認中",
-        受付完了: "受付完了",
-        一次審査中: "一次審査中",
-        二次審査中: "二次審査中",
-        ファイナリスト: "ファイナリスト",
-        入賞者: "入賞者",
-        落選: "落選",
-        辞退: "辞退",
-        その他: "その他",
+        pending: "書類確認中",
+        accept: "受付完了",
+        "1st_review": "一次審査中",
+        "2nd_review": "二次審査中",
+        finalist: "ファイナリスト",
+        winner_grand: "最優秀賞",
+        winner_excellence: "優秀賞",
+        rejected: "落選",
+        withdrawn: "辞退",
+        others: "その他",
       };
 
       let html = `
@@ -1242,7 +1243,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   .map(
                     ([val, label]) => `
                   <option value="${val}" ${
-                      p.status === val ? "selected" : ""
+                      p.status === val || p.status === label ? "selected" : ""
                     }>${label}</option>
                 `
                   )
