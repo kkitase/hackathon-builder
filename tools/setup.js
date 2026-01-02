@@ -26,7 +26,7 @@ async function main() {
   console.log("\n🚀 Hackathon Builder - セットアップ\n");
 
   // サービスアカウントキーの確認
-  const keyPath = resolve(__dirname, "serviceAccountKey.json");
+  const keyPath = resolve(__dirname, "..", "serviceAccountKey.json");
   if (!existsSync(keyPath)) {
     console.log("⚠️  serviceAccountKey.json が見つかりません。");
     console.log("   以下の手順でダウンロードしてください:\n");
