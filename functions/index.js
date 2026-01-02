@@ -29,9 +29,9 @@ exports.ssr = onRequest({ region: "asia-northeast1" }, async (req, res) => {
 
       let robotsTxt;
       if (allowIndexing) {
-        robotsTxt = `# Hackathon Launch Kit - robots.txt\n# 検索エンジンに公開: 有効\n\nUser-agent: *\nDisallow: /admin.html\nAllow: /\n`;
+        robotsTxt = `# Hackathon Builder - robots.txt\n# 検索エンジンに公開: 有効\n\nUser-agent: *\nDisallow: /admin.html\nAllow: /\n`;
       } else {
-        robotsTxt = `# Hackathon Launch Kit - robots.txt\n# 検索エンジンに公開: 無効\n\nUser-agent: *\nDisallow: /\n`;
+        robotsTxt = `# Hackathon Builder - robots.txt\n# 検索エンジンに公開: 無効\n\nUser-agent: *\nDisallow: /\n`;
       }
 
       res.set("Content-Type", "text/plain");

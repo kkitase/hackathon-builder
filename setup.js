@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Hackathon Launch Kit - セットアップスクリプト
+ * Hackathon Builder - セットアップスクリプト
  * Firestore の初期管理者データを対話式で設定します。
  */
 
@@ -23,7 +23,7 @@ const question = (prompt) =>
   new Promise((resolve) => rl.question(prompt, resolve));
 
 async function main() {
-  console.log("\n🚀 Hackathon Launch Kit - セットアップ\n");
+  console.log("\n🚀 Hackathon Builder - セットアップ\n");
 
   // サービスアカウントキーの確認
   const keyPath = resolve(__dirname, "serviceAccountKey.json");

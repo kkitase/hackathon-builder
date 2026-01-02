@@ -1,4 +1,4 @@
-# Hackathon Launch Kit v2
+# Hackathon Builder
 
 Firebase と SSR (Server Side Rendering) を活用した、チラつきのない高速なハッカソン管理・公開システムです。
 
