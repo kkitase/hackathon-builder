@@ -579,3 +579,110 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMetaTags();
   }, 50);
 });
+
+// ===========================
+// 参加登録モーダル
+// ===========================
+const registerModal = document.getElementById("register-modal");
+const registerModalBtn = document.getElementById("register-modal-btn");
+const registerModalClose = document.getElementById("register-modal-close");
+const registerCancelBtn = document.getElementById("register-cancel-btn");
+const registerForm = document.getElementById("register-form");
+const registerMessage = document.getElementById("register-message");
+
+// モーダルを開く
+registerModalBtn?.addEventListener("click", () => {
+  registerModal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+});
+
+// モーダルを閉じる
+const closeRegisterModal = () => {
+  registerModal.style.display = "none";
+  document.body.style.overflow = "";
+  registerForm.reset();
+  registerMessage.style.display = "none";
+};
+
+registerModalClose?.addEventListener("click", closeRegisterModal);
+registerCancelBtn?.addEventListener("click", closeRegisterModal);
+
+// オーバーレイクリックで閉じる
+registerModal?.querySelector(".modal-overlay")?.addEventListener("click", closeRegisterModal);
+
+// フォーム送信
+registerForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  
+  const submitBtn = document.getElementById("register-submit-btn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "送信中...";
+  
+  try {
+    // フォームデータを取得
+    const formData = new FormData(registerForm);
+    const data = {
+      name: formData.get("name").trim(),
+      email: formData.get("email").trim().toLowerCase(),
+      company: formData.get("company").trim(),
+      organization: formData.get("organization").trim(),
+      role: formData.get("role").trim(),
+      experience: formData.get("experience") || "",
+      motivation: formData.get("motivation")?.trim() || "",
+      teamName: formData.get("teamName")?.trim() || "",
+      teamSize: formData.get("teamSize") ? parseInt(formData.get("teamSize")) : null,
+      status: "pending",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    
+    // 必須項目のバリデーション
+    if (!data.name || !data.email || !data.company || !data.organization || !data.role) {
+      throw new Error("必須項目を全て入力してください。");
+    }
+    
+    // メールアドレス形式チェック
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      throw new Error("有効なメールアドレスを入力してください。");
+    }
+    
+    // 重複チェック（同じメールアドレス）
+    const participantsRef = doc(db, "participants", data.email);
+    const existingDoc = await getDoc(participantsRef);
+    
+    if (existingDoc.exists()) {
+      throw new Error("このメールアドレスは既に登録されています。");
+    }
+    
+    // Firestore に保存
+    await setDoc(participantsRef, data);
+    
+    // 成功メッセージを表示
+    registerMessage.textContent = "参加登録が完了しました！ご登録いただいたメールアドレスに確認メールをお送りします。";
+    registerMessage.style.display = "block";
+    registerMessage.style.color = "#10b981";
+    registerMessage.style.backgroundColor = "#d1fae5";
+    registerMessage.style.padding = "1rem";
+    registerMessage.style.borderRadius = "0.5rem";
+    registerMessage.style.marginTop = "1rem";
+    
+    // 3秒後にモーダルを閉じる
+    setTimeout(() => {
+      closeRegisterModal();
+    }, 3000);
+    
+  } catch (error) {
+    console.error("Registration error:", error);
+    registerMessage.textContent = error.message || "登録中にエラーが発生しました。もう一度お試しください。";
+    registerMessage.style.display = "block";
+    registerMessage.style.color = "#ef4444";
+    registerMessage.style.backgroundColor = "#fee2e2";
+    registerMessage.style.padding = "1rem";
+    registerMessage.style.borderRadius = "0.5rem";
+    registerMessage.style.marginTop = "1rem";
+    
+    submitBtn.disabled = false;
+    submitBtn.textContent = "登録する";
+  }
+});

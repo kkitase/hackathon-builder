@@ -30,9 +30,9 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="/assets/main-CKo3nFjf.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/auth-utils-B7sL_hUg.js">
-    <link rel="stylesheet" crossorigin href="/assets/auth-utils-MPk-RgX-.css">
+    <script type="module" crossorigin src="/assets/main-DKd6Wvga.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/auth-utils-CLpYNaaB.js">
+    <link rel="stylesheet" crossorigin href="/assets/auth-utils-BsvO9BIN.css">
   </head>
   <body>
     <div id="drawer-overlay" class="drawer-overlay"></div>
@@ -110,6 +110,13 @@
               style="margin-top: 1.5rem; display: none"
               >{{HERO_CTA}}</a
             >
+            <button
+              id="register-modal-btn"
+              class="btn btn-secondary"
+              style="margin-top: 1.5rem; margin-left: 1rem"
+            >
+              参加登録
+            </button>
           </div>
           <div class="hero-image">
             <img
@@ -136,6 +143,112 @@
         </div>
       </section>
     </main>
+
+    <!-- 参加登録モーダル -->
+    <div id="register-modal" class="modal" style="display: none">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>ハッカソン参加登録</h2>
+          <button class="modal-close" id="register-modal-close">&times;</button>
+        </div>
+        <form id="register-form" class="register-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="reg-name">氏名 <span class="required">*</span></label>
+              <input type="text" id="reg-name" name="name" required />
+            </div>
+            <div class="form-group">
+              <label for="reg-email"
+                >メールアドレス <span class="required">*</span></label
+              >
+              <input type="email" id="reg-email" name="email" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="reg-company"
+                >会社名 <span class="required">*</span></label
+              >
+              <input type="text" id="reg-company" name="company" required />
+            </div>
+            <div class="form-group">
+              <label for="reg-organization"
+                >所属組織（部署名） <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="reg-organization"
+                name="organization"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="reg-role">役職 <span class="required">*</span></label>
+              <input type="text" id="reg-role" name="role" required />
+            </div>
+            <div class="form-group">
+              <label for="reg-experience">経験レベル</label>
+              <select id="reg-experience" name="experience">
+                <option value="">選択してください</option>
+                <option value="beginner">初心者</option>
+                <option value="intermediate">中級者</option>
+                <option value="advanced">上級者</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-motivation">参加動機</label>
+            <textarea id="reg-motivation" name="motivation" rows="3"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="reg-team-name">チーム名</label>
+              <input type="text" id="reg-team-name" name="teamName" />
+            </div>
+            <div class="form-group">
+              <label for="reg-team-size">チーム人数</label>
+              <input
+                type="number"
+                id="reg-team-size"
+                name="teamSize"
+                min="1"
+                max="10"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="register-cancel-btn"
+            >
+              キャンセル
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="register-submit-btn"
+            >
+              登録する
+            </button>
+          </div>
+
+          <div
+            id="register-message"
+            class="register-message"
+            style="display: none"
+          ></div>
+        </form>
+      </div>
+    </div>
 
     <footer
       style="
