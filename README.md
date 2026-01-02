@@ -26,7 +26,15 @@ Firebase と SSR (Server Side Rendering) を活用した、チラつきのない
 
 ## 🚀 構築・公開手順 (10分)
 
-### 1. Firebase プロジェクトの作成と設定
+### 1. リポジトリのクローン
+まず、GitHub からリポジトリをクローンします。
+
+```bash
+git clone https://github.com/kkitase/hackathon-builder.git
+cd hackathon-builder
+```
+
+### 2. Firebase プロジェクトの作成と設定
 CLI を使用して、プロジェクトの枠組みを迅速に作成します。
 
 **前提条件**: Node.js がインストールされていること。未インストールの場合は [Node.js公式サイト](https://nodejs.org/) からダウンロードしてインストールしてください。
@@ -38,30 +46,35 @@ npm install -g firebase-tools
 # 1. ログイン
 firebase login
 
+# (補足) 別のGoogleアカウントを使用したい場合
+# 既にログイン済みで別のアカウントに切り替える場合は、まず追加してから切り替えます
+firebase login:add          # ブラウザが開くので、使用したいアカウントでログイン
+firebase login:use <email>  # 追加したアカウントに切り替え
+
 # 2. プロジェクトの作成 (IDは任意、小文字/数字/ハイフン)
-firebase projects:create <PROJECT_ID> --title "My Hackathon"
+firebase projects:create <PROJECT_ID> -n "My Hackathon"
 
 # 3. Webアプリの登録
 firebase apps:create WEB "Hackathon Web" --project <PROJECT_ID>
 ```
 
-### 2. コンソールでの有効化 (最小限の手動操作)
+### 3. コンソールでの有効化 (最小限の手動操作)
 以下の 2 つだけは [Firebase Console](https://console.firebase.google.com/) で行ってください。
 
-1. **Firestore**: 「開始」→ 東京 (`asia-northeast1`) を選択して作成。
-2. **Authentication**: 「使ってみる」→ **Google** を有効化。
-3. **Storage**: 「使ってみる」→ 「本番環境モード」で作成（OGP画像の保存に使用します）。
-4. **サービスアカウントキーの取得**: プロジェクト → プロジェクト設定 → サービスアカウント → 「新しい秘密鍵の生成」→ ダウンロードしたファイルを `serviceAccountKey.json` としてプロジェクトルートに配置。
+1. **Firestore**: 構築 → 「Firestore Database」を選択、「データベースの作成」→「Standardエディション」→「ロケーション (`asia-northeast1`)」→ 「本番環境モードで開始する」選択して作成。
+2. **Authentication**:  構築 → 「Authentication」を選択、「始める」→ **Google** を有効化。
+3. **Storage**: 構築 → 「Storage」を選択、「使ってみる」→ デフォルト バケットのセットアップで、「すべてのロケーション(`asia-northeast1`)」→「本番環境モード」で作成（OGP 画像の保存に使用します）。（Firebase Storage を使うには Blaze プランが必要です）。gs://<>.firebasestorage.app というようなストレージができたことを確認。
+4. **サービスアカウントキーの取得**: プロジェクト → プロジェクト設定 → サービスアカウント → 「新しい秘密鍵の生成」→ ダウンロードしたファイルを `serviceAccountKey.json` という名前に変更して、プロジェクトルートに配置。
 
-### 3. セットアップとデプロイ
+### 4. セットアップとデプロイ
 
-#### 3.1 Firebase 設定ファイルの作成
+#### 4.1 Firebase 設定ファイルの作成
 ```bash
 # テンプレートをコピーして firebase.js を作成
 cp firebase.js.example firebase.js
 ```
 
-#### 3.2 Firebase 設定情報の取得
+#### 4.2 Firebase 設定情報の取得
 
 以下のコマンドを実行して、設定情報を取得します：
 ```bash
@@ -82,6 +95,9 @@ const firebaseConfig = {
 };
 ```
 
+> **📋 手順**: 上記の出力を `firebase.js` にコピー＆ペーストしてください。
+
+
 | 設定項目 | 説明 | 取得元 |
 |---------|------|--------|
 | `apiKey` | Firebase API キー | `firebase apps:sdkconfig` の出力 |
@@ -91,14 +107,12 @@ const firebaseConfig = {
 | `messagingSenderId` | FCM 送信者 ID | `firebase apps:sdkconfig` の出力 |
 | `appId` | Firebase アプリ ID | `firebase apps:sdkconfig` の出力 |
 
-> **📋 手順**: 上記の出力を `firebase.js` にコピー＆ペーストしてください。
-
-#### 3.3 依存関係のインストール
+#### 4.3 依存関係のインストール
 ```bash
 npm install
 ```
 
-#### 3.4 管理者アカウントのセットアップ
+#### 4.4 管理者アカウントのセットアップ
 ```bash
 # 対話式で管理者ID、パスワード、許可メールアドレスを入力
 npm run setup
@@ -107,10 +121,18 @@ npm run setup
 npm run demo-data
 ```
 
-#### 3.5 ビルドとデプロイ
+#### 4.5 ビルドとデプロイ
 ```bash
+# デプロイ先のプロジェクトを設定
+firebase use <PROJECT_ID>
+
+# ビルドとデプロイ
 npm run build && firebase deploy
 ```
+
+> **📝 初回デプロイ時の確認**
+> - 「Cloud Storage for Firebase needs an IAM Role to use cross-service rules. Grant the new role? (Y/n)」→ `Y` を入力
+> - 「How many days do you want to keep container images before they're deleted?」→ `1` (デフォルト) を入力
 
 ---
 
