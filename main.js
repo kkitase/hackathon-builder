@@ -384,7 +384,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (registerBtnHeader) {
     registerBtnHeader.addEventListener("click", (e) => {
       e.preventDefault();
-      alert("申し込みページへ移動します。");
+      // ヒーローセクションのボタンクリックをシミュレート
+      const registerHeroBtn =
+        document.getElementById("hero-cta") ||
+        document.getElementById("register-modal-btn");
+      if (registerHeroBtn) {
+        registerHeroBtn.click();
+      }
     });
   }
 
@@ -655,7 +661,6 @@ registerForm?.addEventListener("submit", async (e) => {
       company: formData.get("company").trim(),
       organization: formData.get("organization").trim(),
       role: formData.get("role").trim(),
-      experience: formData.get("experience") || "",
       motivation: formData.get("motivation")?.trim() || "",
       teamName: formData.get("teamName")?.trim() || "",
       teamSize:
@@ -664,6 +669,8 @@ registerForm?.addEventListener("submit", async (e) => {
           : teamSizeValue
           ? teamSizeValue
           : null,
+      slideUrl: formData.get("slideUrl")?.trim() || "",
+      dataConsent: formData.get("dataConsent") || "no",
       status: "pending",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

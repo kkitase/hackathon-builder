@@ -6,7 +6,6 @@
     <title></title>
     <meta name="description" content="" />
     <style>
-      /* 初期表示時のチラつき防止 */
       .nav-links > * {
         visibility: hidden;
       }
@@ -14,25 +13,17 @@
         visibility: visible;
       }
     </style>
-    <!-- Social Meta Tags (OGP) -->
     <meta id="meta-og-title" property="og:title" content="" />
-    <meta
-      id="meta-og-description"
-      property="og:description"
-      content=""
-    />
+    <meta id="meta-og-description" property="og:description" content="" />
     <meta id="meta-og-image" property="og:image" content="" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/assets/main-DGy_XeuX.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/auth-utils-Ummc87Ao.js">
-    <link rel="stylesheet" crossorigin href="/assets/auth-utils-BsvO9BIN.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="/assets/main-CCaImX0w.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/auth-utils-MfX3gW1q.js">
+    <link rel="stylesheet" crossorigin href="/assets/auth-utils-BPOfiEsQ.css">
   </head>
   <body>
     <div id="drawer-overlay" class="drawer-overlay"></div>
@@ -57,10 +48,7 @@
         <div class="header-left">
           <button id="menu-toggle" class="menu-toggle">
             <svg viewBox="0 0 24 24" width="24" height="24">
-              <path
-                d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
-                fill="currentColor"
-              ></path>
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" fill="currentColor"></path>
             </svg>
           </button>
           <nav class="tabs-nav">
@@ -77,18 +65,12 @@
         <div class="header-right">
           <div class="nav-links">
             <a href="./admin.html" id="admin-link">管理ページ</a>
-            <a href="#" id="logout-btn-header" style="display: none"
-              >ログアウト</a
-            >
+            <a href="#" id="logout-btn-header" style="display: none">ログアウト</a>
             <div id="user-profile" style="display: none">
-              <a href="#" class="btn btn-dark btn-sm" id="register-btn-header"
-                >参加登録</a
-              >
+              <a href="#" class="btn btn-dark btn-sm" id="register-btn-header">参加登録</a>
               <div id="user-avatar"></div>
             </div>
-            <a href="#" class="btn btn-dark btn-sm" id="auth-btn-header"
-              >サインイン</a
-            >
+            <a href="#" class="btn btn-dark btn-sm" id="auth-btn-header">サインイン</a>
           </div>
         </div>
       </div>
@@ -97,47 +79,26 @@
     <main>
       <section class="hero">
         <div class="container">
-          <div
-            class="hero-content"
-            style="opacity: 0; transition: opacity 0.3s ease"
-          >
+          <div class="hero-content" style="opacity: 0; transition: opacity 0.3s ease">
             <h1 id="hero-title"></h1>
             <p id="hero-subtitle"></p>
-            <button
-              id="register-modal-btn"
-              class="btn btn-secondary"
-              style="margin-top: 1.5rem"
-            >
-              参加登録
-            </button>
+            <button id="register-modal-btn" class="btn btn-secondary" style="margin-top: 1.5rem">参加登録</button>
           </div>
           <div class="hero-image">
-            <img
-              src="/assets/hero-illustration-Wz0fjvbh.jpg"
-              alt="AI Community Illustration"
-            />
+            <img src="/assets/hero-illustration-Wz0fjvbh.jpg" alt="AI Community Illustration" />
           </div>
         </div>
       </section>
 
       <section class="tabs-section">
         <div class="container">
-          <div
-            id="tab-content"
-            class="content-area"
-            style="
-              padding: 2rem 0 80px;
-              opacity: 0;
-              transition: opacity 0.3s ease;
-            "
-          >
-            <!-- Firestore からのデータ読み込み完了後にコンテンツが表示されます -->
+          <div id="tab-content" class="content-area" style="padding: 2rem 0 80px; opacity: 0; transition: opacity 0.3s ease;">
+            <!-- Content Area -->
           </div>
         </div>
       </section>
     </main>
 
-    <!-- 参加登録モーダル -->
     <div id="register-modal" class="modal" style="display: none">
       <div class="modal-overlay"></div>
       <div class="modal-content">
@@ -156,56 +117,30 @@
               <input type="text" id="reg-first-name" name="firstName" required />
             </div>
           </div>
-
           <div class="form-row">
             <div class="form-group">
-              <label for="reg-email"
-                >メールアドレス <span class="required">*</span></label
-              >
-              <input type="email" id="reg-email" name="email" required />
-            </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="reg-company"
-                >会社名 <span class="required">*</span></label
-              >
+              <label for="reg-company">会社名 <span class="required">*</span></label>
               <input type="text" id="reg-company" name="company" required />
             </div>
             <div class="form-group">
-              <label for="reg-organization"
-                >所属組織（部署名） <span class="required">*</span></label
-              >
-              <input
-                type="text"
-                id="reg-organization"
-                name="organization"
-                required
-              />
+              <label for="reg-organization">所属組織（部署名） <span class="required">*</span></label>
+              <input type="text" id="reg-organization" name="organization" required />
             </div>
           </div>
-
           <div class="form-row">
             <div class="form-group">
               <label for="reg-role">役職 <span class="required">*</span></label>
               <input type="text" id="reg-role" name="role" required />
             </div>
             <div class="form-group">
-              <label for="reg-experience">経験レベル</label>
-              <select id="reg-experience" name="experience">
-                <option value="">選択してください</option>
-                <option value="beginner">初心者</option>
-                <option value="intermediate">中級者</option>
-                <option value="advanced">上級者</option>
-              </select>
+              <label for="reg-email">メールアドレス <span class="required">*</span></label>
+              <input type="email" id="reg-email" name="email" required />
             </div>
           </div>
-
           <div class="form-group">
             <label for="reg-motivation">参加動機</label>
             <textarea id="reg-motivation" name="motivation" rows="3"></textarea>
           </div>
-
           <div class="form-row">
             <div class="form-group">
               <label for="reg-team-name">チーム名</label>
@@ -228,44 +163,38 @@
                 <option value="10">10人</option>
               </select>
             </div>
-          </div>          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              id="register-cancel-btn"
-            >
-              キャンセル
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              id="register-submit-btn"
-            >
-              登録する
-            </button>
           </div>
-
-          <div
-            id="register-message"
-            class="register-message"
-            style="display: none"
-          ></div>
+          <div class="form-group">
+            <label for="reg-slide-url">提出スライド</label>
+            <input type="url" id="reg-slide-url" name="slideUrl" placeholder="https://docs.google.com/presentation/d/..." />
+          </div>
+          <div class="consent-group">
+            <div style="padding: 1rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
+              <p style="font-size: 0.875rem; line-height: 1.6; color: var(--text-main); margin: 0 0 1rem 0;">
+                ご記入いただいたご登録情報は、協賛パートナーへ提供される場合がございます。お客様のご情報は、各社から商品、サービス、セミナー等に関するご案内をお送りするために使用いたします。個人情報は各社の個人情報保護ポリシーに則って適切に扱われます。
+              </p>
+              <div style="display: flex; gap: 2rem; align-items: center;">
+                <label style="display: inline-flex; align-items: center; cursor: pointer; gap: 0.5rem;">
+                  <input type="radio" id="consent-yes" name="dataConsent" value="yes" required />
+                  <span>はい</span>
+                </label>
+                <label style="display: inline-flex; align-items: center; cursor: pointer; gap: 0.5rem;">
+                  <input type="radio" id="consent-no" name="dataConsent" value="no" required />
+                  <span>いいえ</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="register-cancel-btn">キャンセル</button>
+            <button type="submit" class="btn btn-primary" id="register-submit-btn">登録する</button>
+          </div>
+          <div id="register-message" class="register-message" style="display: none"></div>
         </form>
       </div>
     </div>
 
-    <footer
-      style="
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-        padding: 40px 0;
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 0.875rem;
-      "
-    >
+    <footer style="background: var(--surface); border-top: 1px solid var(--border); padding: 40px 0; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
       <div class="container">
         <p>&copy; 2025 AI Agent Hackathon Committee. All rights reserved.</p>
       </div>

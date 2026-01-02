@@ -236,7 +236,8 @@ header {
   align-items: center;
 }
 
-.nav-links a, #logout-btn {
+.nav-links a,
+#logout-btn {
   text-decoration: none;
   color: #313335;
   font-weight: 500;
@@ -253,7 +254,8 @@ header {
   white-space: nowrap;
 }
 
-.nav-links a:hover, #logout-btn:hover {
+.nav-links a:hover,
+#logout-btn:hover {
   background: #f8f9fa;
   border-color: #d2dce0;
   color: #202124;
@@ -288,14 +290,16 @@ header {
   border: 1px solid var(--border);
 }
 
-.btn-primary.btn-sm, .btn-dark.btn-sm {
+.btn-primary.btn-sm,
+.btn-dark.btn-sm {
   background: white;
   color: #3c4043;
   border: 1px solid #dadce0;
   box-shadow: none;
 }
 
-.btn-primary.btn-sm:hover, .btn-dark.btn-sm:hover {
+.btn-primary.btn-sm:hover,
+.btn-dark.btn-sm:hover {
   background: #f8f9fa;
   border-color: #d2dce0;
   transform: none;
@@ -466,8 +470,14 @@ header {
   border-radius: 3px 3px 0 0;
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Admin Dashboard Styles */
@@ -478,21 +488,28 @@ header {
 }
 
 .admin-sidebar {
-  background: #1e293b;
+  background: #0f172a;
   color: white;
   padding: 2rem 1rem;
   position: sticky;
   top: 0;
   height: 100vh;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .admin-sidebar h2 {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
   font-size: 1.25rem;
   margin-bottom: 2rem;
   padding: 0 1rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  background: var(--grad-main);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .admin-nav {
@@ -519,22 +536,23 @@ header {
 }
 
 .admin-nav-btn.active {
-  background: var(--primary);
+  background: var(--grad-main);
   color: white;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .admin-main {
   padding: 2.5rem;
-  background: #f1f5f9;
+  background: var(--background);
 }
 
 .admin-card {
   background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: var(--shadow-md);
-  max-width: 900px;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  max-width: 1000px;
+  border: 1px solid var(--border);
 }
 
 .form-group {
@@ -585,7 +603,6 @@ header {
 .item-block {
   margin-bottom: 0.5rem;
 }
-
 
 .tab-btn:hover:not(.active) {
   color: var(--text-main);
@@ -982,17 +999,29 @@ p[data-skeleton]:empty {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .modal-content {
     width: 95%;
     max-height: 95vh;
   }
-  
+
   .register-form {
     padding: 1.5rem;
   }
-  
+
   .modal-header {
     padding: 1rem 1.5rem;
   }
+}
+
+/* ======================
+   個人情報同意セクション
+   ====================== */
+.consent-group {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.consent-group label {
+  font-size: 0.9375rem;
 }
