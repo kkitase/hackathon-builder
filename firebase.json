@@ -21,15 +21,15 @@
     ],
     "rewrites": [
       {
+        "source": "/",
+        "function": "ssr"
+      },
+      {
         "source": "/admin.html",
         "destination": "/admin.html"
       },
       {
         "source": "/robots_dynamic",
-        "function": "ssr"
-      },
-      {
-        "source": "**",
         "function": "ssr"
       }
     ]
