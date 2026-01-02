@@ -6,6 +6,7 @@ import {
   setDoc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
   serverTimestamp,
 } from "firebase/firestore";
 import {
@@ -570,6 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         (email) => `
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--background); border-radius: 0.5rem; margin-bottom: 0.5rem;">
                             <span>${maskEmail(email)}</span>
+                            <button type="button" class="delete-admin-btn btn-sm" data-email="${email}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; border-radius: 0.25rem; cursor: pointer;">削除</button>
                         </div>
                     `
                       )
@@ -728,6 +730,25 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
       }
+
+      // 削除ボタンのイベント設定
+      formContainer.querySelectorAll(".delete-admin-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const email = btn.getAttribute("data-email");
+          if (confirm(`管理者 ${email} を削除してもよろしいですか？`)) {
+            try {
+              await updateDoc(doc(db, "config", "admin"), {
+                authorizedEmails: arrayRemove(email),
+              });
+              showModal("成功", `${email} を管理者リストから削除しました。`);
+              await renderForm("admins");
+            } catch (err) {
+              console.error("Admin deletion failed:", err);
+              alert("管理者の削除に失敗しました。");
+            }
+          }
+        });
+      });
     }
 
     // Social 画像 URL 入力時のプレビュー同期

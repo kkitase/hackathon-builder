@@ -5,7 +5,17 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+  collection,
+  getDocs,
+  updateDoc,
+  query,
+  orderBy,
+} from "firebase/firestore";
 import { checkIsAdmin } from "./auth-utils.js";
 
 // タブコンテンツのフォールバック（Firestore にデータがない場合のみ表示）
@@ -103,13 +113,207 @@ const getContentFromFirestore = async () => {
   return null;
 };
 
-// タブデータを取得（Firestore 優先）
+// タブデータを取得するヘルパー（Firestore またはデフォルト）
 const getTabData = async () => {
-  const firestoreContent = await getContentFromFirestore();
-  if (firestoreContent && firestoreContent.tabs) {
-    return firestoreContent.tabs;
+  const content = await getContentFromFirestore();
+  const firestoreTabs = content?.tabs || {};
+  // マージして欠けている部分はデフォルトを使用
+  return { ...defaultTabData, ...firestoreTabs };
+};
+
+// 参加登録データの管理用
+let currentUserParticipantData = null;
+
+// DOM 要素（初期化は DOMContentLoaded で行う）
+let contentArea = null;
+let userAvatar = null;
+let registerModal = null;
+let registerForm = null;
+let registerMessage = null;
+
+// プロジェクト一覧をレンダリングする
+const renderProjectList = async () => {
+  contentArea.innerHTML = `
+    <div class="fade-in">
+      <h2 style="font-size: 1.75rem; margin-bottom: 2rem;">プロジェクト一覧</h2>
+      <div id="project-list-container" class="judge-grid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+          <p class="text-muted">読み込み中...</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const container = document.getElementById("project-list-container");
+  const user = auth.currentUser;
+
+  try {
+    const q = query(
+      collection(db, "participants"),
+      orderBy("createdAt", "desc")
+    );
+    const querySnapshot = await getDocs(q);
+    const participants = [];
+    querySnapshot.forEach((doc) => {
+      participants.push({ id: doc.id, ...doc.data() });
+    });
+
+    if (participants.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: white; border-radius: 1rem; border: 1px solid var(--border);">
+          <p class="text-muted">登録されているプロジェクトはまだありません。</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = "";
+
+    // 自分のプロジェクトを特定して先頭に持ってくる
+    const myIndex = user
+      ? participants.findIndex((p) => p.email === user.email)
+      : -1;
+    if (myIndex > -1) {
+      const myData = participants.splice(myIndex, 1)[0];
+      participants.unshift(myData);
+      currentUserParticipantData = myData;
+    } else {
+      currentUserParticipantData = null;
+    }
+
+    participants.forEach((p, index) => {
+      const isMine = user && p.email === user.email;
+      const card = document.createElement("div");
+      card.className = "judge-card"; // 既存のカードスタイルを流用
+      card.style.opacity = "0";
+      card.style.transform = "translateY(20px)";
+      card.style.background = isMine ? "rgba(59, 130, 246, 0.05)" : "white";
+      card.style.border = isMine
+        ? "2px solid var(--primary)"
+        : "1px solid var(--border)";
+
+      card.innerHTML = `
+        <div class="judge-info" style="padding: 1.5rem;">
+          ${
+            isMine
+              ? '<span style="display: inline-block; padding: 0.25rem 0.75rem; background: var(--grad-main); color: white; border-radius: 99px; font-size: 0.75rem; font-weight: 800; margin-bottom: 1rem;">あなたのプロジェクト</span>'
+              : ""
+          }
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem; color: var(--text-main);">${
+            p.projectName || "プロジェクト名"
+          }</h3>
+          <div style="margin-bottom: 1rem; font-size: 0.875rem; line-height: 1.6;">
+            <p style="color: var(--text-muted); margin-bottom: 0.25rem;">
+              <strong style="color: var(--text-main);">チーム名:</strong> ${
+                p.teamName || "未定"
+              }
+            </p>
+            <p style="color: var(--text-muted); margin-bottom: 0.25rem;">
+              <strong style="color: var(--text-main);">人数:</strong> ${
+                p.teamSize === "メンバー募集中"
+                  ? '<span style="color: #f59e0b; font-weight: bold;">メンバ募集中</span>'
+                  : p.teamSize || "未定"
+              }
+            </p>
+            <p style="color: var(--text-muted); margin-bottom: 0.25rem;">
+              <strong style="color: var(--text-main);">代表者:</strong> ${
+                p.name
+              }（${p.company}）
+            </p>
+            <p style="color: var(--text-muted);">
+              <strong style="color: var(--text-main);">概要:</strong>
+              ${
+                p.motivation
+                  ? p.motivation.length > 60
+                    ? p.motivation.substring(0, 60) + "..."
+                    : p.motivation
+                  : ""
+              }
+            </p>
+          </div>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            ${
+              p.slideUrl
+                ? `<a href="${p.slideUrl}" target="_blank" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">スライドを見る</a>`
+                : '<span class="text-muted" style="font-size: 0.875rem;">スライド未提出</span>'
+            }
+            ${
+              isMine
+                ? `<button id="edit-my-project-btn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">編集する</button>`
+                : ""
+            }
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+
+      // アニメーション適用
+      setTimeout(() => {
+        card.style.transition = "all 0.6s cubic-bezier(0.22, 1, 0.36, 1)";
+        card.style.opacity = "1";
+        card.style.transform = "translateY(0)";
+      }, 50 * index);
+
+      if (isMine) {
+        card.querySelector("#edit-my-project-btn").onclick = () => {
+          openRegisterModalForEdit(p);
+        };
+      }
+    });
+  } catch (error) {
+    console.error("Project list error:", error);
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: #fee2e2; border-radius: 1rem; border: 1px solid #f87171; color: #b91c1c;">
+        <p>プロジェクト一覧の取得に失敗しました。認証状態を確認してください。</p>
+      </div>
+    `;
   }
-  return defaultTabData;
+};
+
+// 編集モードでモーダルを開く
+const openRegisterModalForEdit = (data) => {
+  const title = document.getElementById("register-modal-title");
+  const submitBtn = document.getElementById("register-submit-btn");
+  const withdrawBtn = document.getElementById("register-withdraw-btn");
+
+  if (title) title.textContent = "登録情報の編集";
+  if (submitBtn) submitBtn.textContent = "更新する";
+  if (withdrawBtn) withdrawBtn.style.display = "inline-flex";
+
+  // フォームに値をセット
+  const form = document.getElementById("register-form");
+  if (form) {
+    form.lastName.value = data.lastName || "";
+    form.firstName.value = data.firstName || "";
+    form.company.value = data.company || "";
+    form.organization.value = data.organization || "";
+    form.role.value = data.role || "";
+    form.email.value = data.email || "";
+    form.motivation.value = data.motivation || "";
+    form.projectName.value = data.projectName || "";
+    form.teamName.value = data.teamName || "";
+    form.teamSize.value =
+      data.teamSize === "未定"
+        ? "undecided"
+        : data.teamSize === "メンバー募集中"
+        ? "recruiting"
+        : data.teamSize || "";
+    form.slideUrl.value = data.slideUrl || "";
+
+    if (data.dataConsent === "yes") {
+      document.getElementById("consent-yes").checked = true;
+    } else {
+      document.getElementById("consent-no").checked = true;
+    }
+
+    // メールアドレスは変更不可にする（主キーのため）
+    form.email.readOnly = true;
+    form.email.style.background = "#f1f5f9";
+  }
+
+  registerModal.style.display = "flex";
+  document.body.style.overflow = "hidden";
 };
 
 // Auth Functions
@@ -311,15 +515,23 @@ const showAdminLoginModal = () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const tabButtons = document.querySelectorAll(".tab-btn");
-  const contentArea = document.getElementById("tab-content");
+  contentArea = document.getElementById("tab-content");
   const loginBtn = document.getElementById("login-btn");
   const userProfile = document.getElementById("user-profile");
-  const userAvatar = document.getElementById("user-avatar");
+  userAvatar = document.getElementById("user-avatar");
   const adminLink = document.getElementById("admin-link");
   const menuToggle = document.getElementById("menu-toggle");
   const drawerClose = document.getElementById("drawer-close");
   const mobileDrawer = document.getElementById("mobile-drawer");
   const drawerOverlay = document.getElementById("drawer-overlay");
+
+  // モーダル要素の初期化
+  registerModal = document.getElementById("register-modal");
+  registerForm = document.getElementById("register-form");
+  registerMessage = document.getElementById("register-message");
+  const registerModalBtn = document.getElementById("register-modal-btn");
+  const registerModalClose = document.getElementById("register-modal-close");
+  const registerCancelBtn = document.getElementById("register-cancel-btn");
 
   const toggleDrawer = (show) => {
     mobileDrawer.classList.toggle("active", show);
@@ -362,13 +574,37 @@ document.addEventListener("DOMContentLoaded", () => {
         const isAdmin = await checkIsAdmin(user);
         if (adminLink)
           adminLink.style.display = isAdmin ? "inline-flex" : "none";
+
+        // 参加登録状況を確認
+        try {
+          const pDoc = await getDoc(doc(db, "participants", user.email));
+          if (pDoc.exists()) {
+            currentUserParticipantData = { id: pDoc.id, ...pDoc.data() };
+            // ボタンの文言を変更
+            const heroCta =
+              document.getElementById("hero-cta") ||
+              document.getElementById("register-modal-btn");
+            if (heroCta) heroCta.textContent = "登録情報確認";
+            if (registerBtnHeader)
+              registerBtnHeader.textContent = "登録情報確認";
+          } else {
+            currentUserParticipantData = null;
+          }
+        } catch (e) {
+          console.warn("参加情報の取得に失敗:", e);
+        }
       }
     } else {
+      currentUserParticipantData = null;
       if (authBtnHeader) authBtnHeader.style.display = "inline-flex";
       if (userProfile) userProfile.style.display = "none";
       if (adminLink) adminLink.style.display = "none";
       const logoutBtnHeader = document.getElementById("logout-btn-header");
       if (logoutBtnHeader) logoutBtnHeader.style.display = "none";
+      if (registerBtnHeader) registerBtnHeader.textContent = "参加登録";
+
+      const heroCta = document.getElementById("hero-cta");
+      if (heroCta) heroCta.textContent = defaultHeroData.ctaText;
     }
   });
 
@@ -422,7 +658,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // CTA ボタン（テキストが設定されている場合のみ表示）
     if (heroCta) {
-      if (hero.ctaText) {
+      if (currentUserParticipantData) {
+        heroCta.textContent = "登録情報確認";
+        heroCta.style.display = "inline-block";
+      } else if (hero.ctaText) {
         heroCta.textContent = hero.ctaText;
         heroCta.style.display = "inline-block";
       } else {
@@ -480,7 +719,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Update Content
-    if (currentData[tabName]) {
+    if (tabName === "projects") {
+      await renderProjectList();
+    } else if (currentData[tabName]) {
       contentArea.innerHTML = currentData[tabName];
       // Re-apply animations for new elements
       const newCards = contentArea.querySelectorAll(".judge-card");
@@ -582,155 +823,256 @@ document.addEventListener("DOMContentLoaded", () => {
   // 初期リサイズ実行
   setTimeout(() => {
     checkMenuOverflow();
-    updateMetaTags();
   }, 50);
-});
 
-// ===========================
-// 参加登録モーダル
-// ===========================
-const registerModal = document.getElementById("register-modal");
-const registerModalBtn = document.getElementById("register-modal-btn");
-const registerModalClose = document.getElementById("register-modal-close");
-const registerCancelBtn = document.getElementById("register-cancel-btn");
-const registerForm = document.getElementById("register-form");
-const registerMessage = document.getElementById("register-message");
+  // ===========================
+  // 参加登録モーダルのイベント設定
+  // ===========================
 
-// モーダルを開く（認証チェック付き）
-registerModalBtn?.addEventListener("click", () => {
-  // 認証状態を確認
-  const user = auth.currentUser;
+  // モーダルを開く（認証チェック付き）
+  registerModalBtn?.addEventListener("click", () => {
+    // 認証状態を確認
+    const user = auth.currentUser;
 
-  if (!user) {
-    // 未ログインの場合はサインインボタンをクリック
-    const authBtn = document.getElementById("auth-btn-header");
-    if (authBtn) {
-      authBtn.click();
-    }
-    return;
-  }
-
-  // ログイン済みの場合はモーダルを開く
-  registerModal.style.display = "flex";
-  document.body.style.overflow = "hidden";
-
-  // メールアドレスを自動入力
-  const emailInput = document.getElementById("reg-email");
-  if (emailInput && user.email) {
-    emailInput.value = user.email;
-  }
-});
-
-// モーダルを閉じる
-const closeRegisterModal = () => {
-  registerModal.style.display = "none";
-  document.body.style.overflow = "";
-  registerForm.reset();
-  registerMessage.style.display = "none";
-};
-
-registerModalClose?.addEventListener("click", closeRegisterModal);
-registerCancelBtn?.addEventListener("click", closeRegisterModal);
-
-// オーバーレイクリックで閉じる
-registerModal
-  ?.querySelector(".modal-overlay")
-  ?.addEventListener("click", closeRegisterModal);
-
-// フォーム送信
-registerForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const submitBtn = document.getElementById("register-submit-btn");
-  submitBtn.disabled = true;
-  submitBtn.textContent = "送信中...";
-
-  try {
-    // フォームデータを取得
-    const formData = new FormData(registerForm);
-    const lastName = formData.get("lastName").trim();
-    const firstName = formData.get("firstName").trim();
-    const name = `${lastName} ${firstName}`; // 姓名を結合
-    const teamSizeValue = formData.get("teamSize");
-
-    const data = {
-      name,
-      lastName,
-      firstName,
-      email: formData.get("email").trim().toLowerCase(),
-      company: formData.get("company").trim(),
-      organization: formData.get("organization").trim(),
-      role: formData.get("role").trim(),
-      motivation: formData.get("motivation")?.trim() || "",
-      teamName: formData.get("teamName")?.trim() || "",
-      teamSize:
-        teamSizeValue === "undecided"
-          ? "未定"
-          : teamSizeValue
-          ? teamSizeValue
-          : null,
-      slideUrl: formData.get("slideUrl")?.trim() || "",
-      dataConsent: formData.get("dataConsent") || "no",
-      status: "pending",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    };
-
-    // 必須項目のバリデーション
-    if (
-      !lastName ||
-      !firstName ||
-      !data.email ||
-      !data.company ||
-      !data.organization ||
-      !data.role
-    ) {
-      throw new Error("必須項目を全て入力してください。");
+    if (!user) {
+      // 未ログインの場合はサインインボタンをクリック
+      const authBtn = document.getElementById("auth-btn-header");
+      if (authBtn) {
+        authBtn.click();
+      }
+      return;
     }
 
-    // メールアドレス形式チェック
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-      throw new Error("有効なメールアドレスを入力してください。");
+    // 既に登録済みかチェック
+    if (currentUserParticipantData) {
+      openRegisterModalForEdit(currentUserParticipantData);
+      return;
     }
 
-    // 重複チェック（同じメールアドレス）
-    const participantsRef = doc(db, "participants", data.email);
-    const existingDoc = await getDoc(participantsRef);
+    // ログイン済みの場合はモーダルを開く
+    // タイトルとボタンをリセット
+    const title = document.getElementById("register-modal-title");
+    const submitBtn = document.getElementById("register-submit-btn");
+    const withdrawBtn = document.getElementById("register-withdraw-btn");
+    if (title) title.textContent = "ハッカソン参加登録";
+    if (submitBtn) submitBtn.textContent = "登録する";
+    if (withdrawBtn) withdrawBtn.style.display = "none";
 
-    if (existingDoc.exists()) {
-      throw new Error("このメールアドレスは既に登録されています。");
+    // フォームの状態をリセット（編集モードの残骸を消す）
+    if (registerForm && registerForm.email) {
+      registerForm.email.readOnly = false;
+      registerForm.email.style.background = "";
     }
 
-    // Firestore に保存
-    await setDoc(participantsRef, data);
+    registerModal.style.display = "flex";
+    document.body.style.overflow = "hidden";
 
-    // 成功メッセージを表示
-    registerMessage.textContent =
-      "参加登録が完了しました！ご登録いただいたメールアドレスに確認メールをお送りします。";
-    registerMessage.style.display = "block";
-    registerMessage.style.color = "#10b981";
-    registerMessage.style.backgroundColor = "#d1fae5";
-    registerMessage.style.padding = "1rem";
-    registerMessage.style.borderRadius = "0.5rem";
-    registerMessage.style.marginTop = "1rem";
+    // メールアドレスを自動入力
+    const emailInput = document.getElementById("reg-email");
+    if (emailInput && user.email) {
+      emailInput.value = user.email;
+    }
+  });
 
-    // 3秒後にモーダルを閉じる
-    setTimeout(() => {
-      closeRegisterModal();
-    }, 3000);
-  } catch (error) {
-    console.error("Registration error:", error);
-    registerMessage.textContent =
-      error.message || "登録中にエラーが発生しました。もう一度お試しください。";
-    registerMessage.style.display = "block";
-    registerMessage.style.color = "#ef4444";
-    registerMessage.style.backgroundColor = "#fee2e2";
-    registerMessage.style.padding = "1rem";
-    registerMessage.style.borderRadius = "0.5rem";
-    registerMessage.style.marginTop = "1rem";
+  // モーダルを閉じる
+  const closeRegisterModal = () => {
+    if (registerModal) registerModal.style.display = "none";
+    document.body.style.overflow = "";
+    if (registerForm) {
+      registerForm.reset();
+      if (registerForm.email) {
+        registerForm.email.readOnly = false;
+        registerForm.email.style.background = "";
+      }
+    }
+    if (registerMessage) registerMessage.style.display = "none";
+    // 取り下げボタンを非表示に戻す
+    const withdrawBtn = document.getElementById("register-withdraw-btn");
+    if (withdrawBtn) withdrawBtn.style.display = "none";
+  };
 
-    submitBtn.disabled = false;
-    submitBtn.textContent = "登録する";
-  }
+  registerModalClose?.addEventListener("click", closeRegisterModal);
+  registerCancelBtn?.addEventListener("click", closeRegisterModal);
+
+  // 取り下げボタン
+  const registerWithdrawBtn = document.getElementById("register-withdraw-btn");
+  registerWithdrawBtn?.addEventListener("click", async () => {
+    if (!currentUserParticipantData) return;
+
+    const confirmed = confirm(
+      "本当に登録を取り下げますか？この操作は元に戻せません。"
+    );
+    if (!confirmed) return;
+
+    try {
+      const { deleteDoc } = await import("firebase/firestore");
+      await deleteDoc(
+        doc(db, "participants", currentUserParticipantData.email)
+      );
+
+      currentUserParticipantData = null;
+
+      // ヒーローセクションとヘッダーのボタンをリセット
+      const heroCta = document.getElementById("hero-cta");
+      const registerBtnHeader = document.getElementById("register-btn-header");
+      if (heroCta) heroCta.textContent = defaultHeroData.ctaText;
+      if (registerBtnHeader) registerBtnHeader.textContent = "参加登録";
+
+      if (registerMessage) {
+        registerMessage.textContent = "登録を取り下げました。";
+        registerMessage.style.display = "block";
+        registerMessage.style.color = "#ef4444";
+        registerMessage.style.backgroundColor = "#fee2e2";
+        registerMessage.style.padding = "1rem";
+        registerMessage.style.borderRadius = "0.5rem";
+        registerMessage.style.marginTop = "1rem";
+      }
+
+      // 2秒後にモーダルを閉じる
+      setTimeout(() => {
+        closeRegisterModal();
+        // プロジェクトタブにいる場合は再読み込み
+        if (document.querySelector(".tab-btn[data-tab='projects'].active")) {
+          renderProjectList();
+        }
+      }, 2000);
+    } catch (error) {
+      console.error("Withdraw error:", error);
+      if (registerMessage) {
+        registerMessage.textContent = "取り下げに失敗しました。";
+        registerMessage.style.display = "block";
+        registerMessage.style.color = "#ef4444";
+      }
+    }
+  });
+
+  // オーバーレイクリックで閉じる
+  registerModal
+    ?.querySelector(".modal-overlay")
+    ?.addEventListener("click", closeRegisterModal);
+
+  // フォーム送信
+  registerForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("register-submit-btn");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "送信中...";
+    }
+
+    try {
+      // フォームデータを取得
+      const formData = new FormData(registerForm);
+      const lastName = formData.get("lastName")?.trim() || "";
+      const firstName = formData.get("firstName")?.trim() || "";
+      const name = `${lastName} ${firstName}`; // 姓名を結合
+      const teamSizeValue = formData.get("teamSize");
+
+      const data = {
+        name,
+        lastName,
+        firstName,
+        email: formData.get("email")?.trim().toLowerCase() || "",
+        company: formData.get("company")?.trim() || "",
+        organization: formData.get("organization")?.trim() || "",
+        role: formData.get("role")?.trim() || "",
+        motivation: formData.get("motivation")?.trim() || "",
+        projectName: formData.get("projectName")?.trim() || "",
+        teamName: formData.get("teamName")?.trim() || "",
+        teamSize:
+          teamSizeValue === "undecided"
+            ? "未定"
+            : teamSizeValue === "recruiting"
+            ? "メンバー募集中"
+            : teamSizeValue
+            ? teamSizeValue
+            : null,
+        slideUrl: formData.get("slideUrl")?.trim() || "",
+        dataConsent: formData.get("dataConsent") || "no",
+        status: "pending",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      // 必須項目のバリデーション
+      if (
+        !lastName ||
+        !firstName ||
+        !data.email ||
+        !data.company ||
+        !data.organization ||
+        !data.role
+      ) {
+        throw new Error("必須項目を全て入力してください。");
+      }
+
+      // メールアドレス形式チェック
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        throw new Error("有効なメールアドレスを入力してください。");
+      }
+
+      // 既存データの有無で処理を分岐
+      const participantsRef = doc(db, "participants", data.email);
+
+      if (currentUserParticipantData) {
+        // 更新処理
+        delete data.createdAt; // 作成日は維持
+        await updateDoc(participantsRef, data);
+        if (registerMessage)
+          registerMessage.textContent = "登録情報を更新しました！";
+      } else {
+        // 新規登録処理
+        // 重複チェック
+        const existingDoc = await getDoc(participantsRef);
+        if (existingDoc.exists()) {
+          throw new Error("このメールアドレスは既に登録されています。");
+        }
+        await setDoc(participantsRef, data);
+        if (registerMessage)
+          registerMessage.textContent = "参加登録が完了しました！";
+      }
+
+      if (registerMessage) {
+        registerMessage.style.display = "block";
+        registerMessage.style.color = "#10b981";
+        registerMessage.style.backgroundColor = "#d1fae5";
+        registerMessage.style.padding = "1rem";
+        registerMessage.style.borderRadius = "0.5rem";
+        registerMessage.style.marginTop = "1rem";
+      }
+
+      // 成功時に一覧を再読み込み（プロジェクトタブにいる場合）
+      if (
+        currentUserParticipantData ||
+        document.querySelector(".tab-btn[data-tab='projects'].active")
+      ) {
+        await renderProjectList();
+      }
+
+      // 3秒後にモーダルを閉じる
+      setTimeout(() => {
+        closeRegisterModal();
+      }, 3000);
+    } catch (error) {
+      console.error("Registration error:", error);
+      if (registerMessage) {
+        registerMessage.textContent =
+          error.message ||
+          "登録中にエラーが発生しました。もう一度お試しください。";
+        registerMessage.style.display = "block";
+        registerMessage.style.color = "#ef4444";
+        registerMessage.style.backgroundColor = "#fee2e2";
+        registerMessage.style.padding = "1rem";
+        registerMessage.style.borderRadius = "0.5rem";
+        registerMessage.style.marginTop = "1rem";
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "登録する";
+      }
+    }
+  });
 });

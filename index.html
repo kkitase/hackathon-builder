@@ -14,13 +14,20 @@
       }
     </style>
     <meta id="meta-og-title" property="og:title" content="{{OGP_TITLE}}" />
-    <meta id="meta-og-description" property="og:description" content="{{OGP_DESCRIPTION}}" />
+    <meta
+      id="meta-og-description"
+      property="og:description"
+      content="{{OGP_DESCRIPTION}}"
+    />
     <meta id="meta-og-image" property="og:image" content="{{OGP_IMAGE}}" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -46,7 +53,10 @@
         <div class="header-left">
           <button id="menu-toggle" class="menu-toggle">
             <svg viewBox="0 0 24 24" width="24" height="24">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" fill="currentColor"></path>
+              <path
+                d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
+                fill="currentColor"
+              ></path>
             </svg>
           </button>
           <nav class="tabs-nav">
@@ -63,12 +73,18 @@
         <div class="header-right">
           <div class="nav-links">
             <a href="./admin.html" id="admin-link">管理ページ</a>
-            <a href="#" id="logout-btn-header" style="display: none">ログアウト</a>
+            <a href="#" id="logout-btn-header" style="display: none"
+              >ログアウト</a
+            >
             <div id="user-profile" style="display: none">
-              <a href="#" class="btn btn-dark btn-sm" id="register-btn-header">参加登録</a>
+              <a href="#" class="btn btn-dark btn-sm" id="register-btn-header"
+                >参加登録</a
+              >
               <div id="user-avatar"></div>
             </div>
-            <a href="#" class="btn btn-dark btn-sm" id="auth-btn-header">サインイン</a>
+            <a href="#" class="btn btn-dark btn-sm" id="auth-btn-header"
+              >サインイン</a
+            >
           </div>
         </div>
       </div>
@@ -77,20 +93,40 @@
     <main>
       <section class="hero">
         <div class="container">
-          <div class="hero-content" style="opacity: 0; transition: opacity 0.3s ease">
+          <div
+            class="hero-content"
+            style="opacity: 0; transition: opacity 0.3s ease"
+          >
             <h1 id="hero-title">{{HERO_TITLE}}</h1>
             <p id="hero-subtitle">{{HERO_SUBTITLE}}</p>
-            <button id="register-modal-btn" class="btn btn-secondary" style="margin-top: 1.5rem">参加登録</button>
+            <button
+              id="register-modal-btn"
+              class="btn btn-secondary"
+              style="margin-top: 1.5rem"
+            >
+              参加登録
+            </button>
           </div>
           <div class="hero-image">
-            <img src="./assets/hero-illustration.jpg" alt="AI Community Illustration" />
+            <img
+              src="./assets/hero-illustration.jpg"
+              alt="AI Community Illustration"
+            />
           </div>
         </div>
       </section>
 
       <section class="tabs-section">
         <div class="container">
-          <div id="tab-content" class="content-area" style="padding: 2rem 0 80px; opacity: 0; transition: opacity 0.3s ease;">
+          <div
+            id="tab-content"
+            class="content-area"
+            style="
+              padding: 2rem 0 80px;
+              opacity: 0;
+              transition: opacity 0.3s ease;
+            "
+          >
             <!-- Content Area -->
           </div>
         </div>
@@ -101,28 +137,46 @@
       <div class="modal-overlay"></div>
       <div class="modal-content">
         <div class="modal-header">
-          <h2>ハッカソン参加登録</h2>
+          <h2 id="register-modal-title">ハッカソン参加登録</h2>
           <button class="modal-close" id="register-modal-close">&times;</button>
         </div>
         <form id="register-form" class="register-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="reg-last-name">姓 <span class="required">*</span></label>
+              <label for="reg-last-name"
+                >姓 <span class="required">*</span></label
+              >
               <input type="text" id="reg-last-name" name="lastName" required />
             </div>
             <div class="form-group">
-              <label for="reg-first-name">名 <span class="required">*</span></label>
-              <input type="text" id="reg-first-name" name="firstName" required />
+              <label for="reg-first-name"
+                >名 <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="reg-first-name"
+                name="firstName"
+                required
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="reg-company">会社名 <span class="required">*</span></label>
+              <label for="reg-company"
+                >会社名 <span class="required">*</span></label
+              >
               <input type="text" id="reg-company" name="company" required />
             </div>
             <div class="form-group">
-              <label for="reg-organization">所属組織（部署名） <span class="required">*</span></label>
-              <input type="text" id="reg-organization" name="organization" required />
+              <label for="reg-organization"
+                >所属組織（部署名） <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="reg-organization"
+                name="organization"
+                required
+              />
             </div>
           </div>
           <div class="form-row">
@@ -131,13 +185,29 @@
               <input type="text" id="reg-role" name="role" required />
             </div>
             <div class="form-group">
-              <label for="reg-email">メールアドレス <span class="required">*</span></label>
+              <label for="reg-email"
+                >メールアドレス <span class="required">*</span></label
+              >
               <input type="email" id="reg-email" name="email" required />
             </div>
           </div>
           <div class="form-group">
-            <label for="reg-motivation">参加動機</label>
-            <textarea id="reg-motivation" name="motivation" rows="3"></textarea>
+            <label for="reg-project-name">プロジェクト名</label>
+            <input
+              type="text"
+              id="reg-project-name"
+              name="projectName"
+              placeholder="開発予定のサービス名やプロダクト名"
+            />
+          </div>
+          <div class="form-group">
+            <label for="reg-motivation">プロジェクト概要</label>
+            <textarea
+              id="reg-motivation"
+              name="motivation"
+              rows="3"
+              placeholder="プロジェクトの内容や目標を簡単に記載してください"
+            ></textarea>
           </div>
           <div class="form-row">
             <div class="form-group">
@@ -149,6 +219,7 @@
               <select id="reg-team-size" name="teamSize">
                 <option value="">選択してください</option>
                 <option value="undecided">未定</option>
+                <option value="recruiting">メンバー募集中</option>
                 <option value="1">1人</option>
                 <option value="2">2人</option>
                 <option value="3">3人</option>
@@ -164,35 +235,118 @@
           </div>
           <div class="form-group">
             <label for="reg-slide-url">提出スライド</label>
-            <input type="url" id="reg-slide-url" name="slideUrl" placeholder="https://docs.google.com/presentation/d/..." />
+            <input
+              type="url"
+              id="reg-slide-url"
+              name="slideUrl"
+              placeholder="https://docs.google.com/presentation/d/..."
+            />
           </div>
           <div class="consent-group">
-            <div style="padding: 1rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
-              <p style="font-size: 0.875rem; line-height: 1.6; color: var(--text-main); margin: 0 0 1rem 0;">
+            <div
+              style="
+                padding: 1rem;
+                background: #f8f9fa;
+                border-radius: 0.5rem;
+                margin-bottom: 1rem;
+              "
+            >
+              <p
+                style="
+                  font-size: 0.875rem;
+                  line-height: 1.6;
+                  color: var(--text-main);
+                  margin: 0 0 1rem 0;
+                "
+              >
                 ご記入いただいたご登録情報は、協賛パートナーへ提供される場合がございます。お客様のご情報は、各社から商品、サービス、セミナー等に関するご案内をお送りするために使用いたします。個人情報は各社の個人情報保護ポリシーに則って適切に扱われます。
               </p>
-              <div style="display: flex; gap: 2rem; align-items: center;">
-                <label style="display: inline-flex; align-items: center; cursor: pointer; gap: 0.5rem;">
-                  <input type="radio" id="consent-yes" name="dataConsent" value="yes" required />
+              <div style="display: flex; gap: 2rem; align-items: center">
+                <label
+                  style="
+                    display: inline-flex;
+                    align-items: center;
+                    cursor: pointer;
+                    gap: 0.5rem;
+                  "
+                >
+                  <input
+                    type="radio"
+                    id="consent-yes"
+                    name="dataConsent"
+                    value="yes"
+                    required
+                  />
                   <span>はい</span>
                 </label>
-                <label style="display: inline-flex; align-items: center; cursor: pointer; gap: 0.5rem;">
-                  <input type="radio" id="consent-no" name="dataConsent" value="no" required />
+                <label
+                  style="
+                    display: inline-flex;
+                    align-items: center;
+                    cursor: pointer;
+                    gap: 0.5rem;
+                  "
+                >
+                  <input
+                    type="radio"
+                    id="consent-no"
+                    name="dataConsent"
+                    value="no"
+                    required
+                  />
                   <span>いいえ</span>
                 </label>
               </div>
             </div>
           </div>
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" id="register-cancel-btn">キャンセル</button>
-            <button type="submit" class="btn btn-primary" id="register-submit-btn">登録する</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="register-cancel-btn"
+            >
+              キャンセル
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="register-submit-btn"
+            >
+              登録する
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="register-withdraw-btn"
+              style="
+                display: none;
+                background: #ef4444;
+                border-color: #ef4444;
+                color: white;
+              "
+            >
+              取り下げ
+            </button>
           </div>
-          <div id="register-message" class="register-message" style="display: none"></div>
+          <div
+            id="register-message"
+            class="register-message"
+            style="display: none"
+          ></div>
         </form>
       </div>
     </div>
 
-    <footer style="background: var(--surface); border-top: 1px solid var(--border); padding: 40px 0; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+    <footer
+      style="
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 40px 0;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+      "
+    >
       <div class="container">
         <p>&copy; 2025 AI Agent Hackathon Committee. All rights reserved.</p>
       </div>
