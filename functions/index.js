@@ -7,9 +7,9 @@ admin.initializeApp();
 
 // デフォルトのヒーローデータ
 const defaultHeroData = {
-  title: "第3回 AI Agent Hackathon with Google Cloud",
+  title: "Hackathon Builder",
   subtitle:
-    "未来を創るAIエージェントの競演。Google Cloudのパワーを使い、次世代のソリューションを開発せよ。",
+    "Firebase で爆速構築。理想のハッカソンイベントを、今すぐ始めましょう。",
 };
 
 // OGP SSR Function (東京リージョン)
@@ -45,9 +45,9 @@ exports.ssr = onRequest({ region: "asia-northeast1" }, async (req, res) => {
     const ogpData = ogpSnap.exists
       ? ogpSnap.data()
       : {
-          ogTitle: "第3回 AI Agent Hackathon with Google Cloud",
+          ogTitle: "Hackathon Builder",
           ogDescription:
-            "未来を創るAIエージェントの競演。Google Cloudのパワーを使い、次世代のソリューションを開発せよ。",
+            "Firebase で爆速構築。理想のハッカソンイベントを、今すぐ始めましょう。",
           ogImage: "",
         };
 
