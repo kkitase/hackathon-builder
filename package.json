@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "init": "node tools/init-project.js",
+    "deploy": "npm run build && firebase deploy",
     "dev": "vite",
     "build": "vite build && cp dist/index.html functions/template.html && mv dist/index.html dist/_index.html",
     "preview": "vite preview",
