@@ -22,10 +22,10 @@ service cloud.firestore {
 
     // 参加者登録（誰でも作成可能、読み取り・更新・削除は管理者のみ）
     match /participants/{participantId} {
-      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'company', 'organization', 'role', 'createdAt']) &&
+      allow create: if request.resource.data.keys().hasAll(['lastName', 'firstName', 'email', 'company', 'organization', 'role', 'createdAt']) &&
                        request.resource.data.email is string &&
                        request.resource.data.email.matches('.*@.*') &&
-                       request.resource.data.name is string &&
+                       request.resource.data.lastName is string && request.resource.data.firstName is string &&
                        request.resource.data.company is string &&
                        request.resource.data.organization is string &&
                        request.resource.data.role is string;

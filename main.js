@@ -590,10 +590,29 @@ const registerCancelBtn = document.getElementById("register-cancel-btn");
 const registerForm = document.getElementById("register-form");
 const registerMessage = document.getElementById("register-message");
 
-// モーダルを開く
+// モーダルを開く（認証チェック付き）
 registerModalBtn?.addEventListener("click", () => {
+  // 認証状態を確認
+  const user = auth.currentUser;
+
+  if (!user) {
+    // 未ログインの場合はサインインボタンをクリック
+    const authBtn = document.getElementById("auth-btn-header");
+    if (authBtn) {
+      authBtn.click();
+    }
+    return;
+  }
+
+  // ログイン済みの場合はモーダルを開く
   registerModal.style.display = "flex";
   document.body.style.overflow = "hidden";
+
+  // メールアドレスを自動入力
+  const emailInput = document.getElementById("reg-email");
+  if (emailInput && user.email) {
+    emailInput.value = user.email;
+  }
 });
 
 // モーダルを閉じる
@@ -608,21 +627,30 @@ registerModalClose?.addEventListener("click", closeRegisterModal);
 registerCancelBtn?.addEventListener("click", closeRegisterModal);
 
 // オーバーレイクリックで閉じる
-registerModal?.querySelector(".modal-overlay")?.addEventListener("click", closeRegisterModal);
+registerModal
+  ?.querySelector(".modal-overlay")
+  ?.addEventListener("click", closeRegisterModal);
 
 // フォーム送信
 registerForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  
+
   const submitBtn = document.getElementById("register-submit-btn");
   submitBtn.disabled = true;
   submitBtn.textContent = "送信中...";
-  
+
   try {
     // フォームデータを取得
     const formData = new FormData(registerForm);
+    const lastName = formData.get("lastName").trim();
+    const firstName = formData.get("firstName").trim();
+    const name = `${lastName} ${firstName}`; // 姓名を結合
+    const teamSizeValue = formData.get("teamSize");
+
     const data = {
-      name: formData.get("name").trim(),
+      name,
+      lastName,
+      firstName,
       email: formData.get("email").trim().toLowerCase(),
       company: formData.get("company").trim(),
       organization: formData.get("organization").trim(),
@@ -630,58 +658,71 @@ registerForm?.addEventListener("submit", async (e) => {
       experience: formData.get("experience") || "",
       motivation: formData.get("motivation")?.trim() || "",
       teamName: formData.get("teamName")?.trim() || "",
-      teamSize: formData.get("teamSize") ? parseInt(formData.get("teamSize")) : null,
+      teamSize:
+        teamSizeValue === "undecided"
+          ? "未定"
+          : teamSizeValue
+          ? teamSizeValue
+          : null,
       status: "pending",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    
+
     // 必須項目のバリデーション
-    if (!data.name || !data.email || !data.company || !data.organization || !data.role) {
+    if (
+      !lastName ||
+      !firstName ||
+      !data.email ||
+      !data.company ||
+      !data.organization ||
+      !data.role
+    ) {
       throw new Error("必須項目を全て入力してください。");
     }
-    
+
     // メールアドレス形式チェック
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {
       throw new Error("有効なメールアドレスを入力してください。");
     }
-    
+
     // 重複チェック（同じメールアドレス）
     const participantsRef = doc(db, "participants", data.email);
     const existingDoc = await getDoc(participantsRef);
-    
+
     if (existingDoc.exists()) {
       throw new Error("このメールアドレスは既に登録されています。");
     }
-    
+
     // Firestore に保存
     await setDoc(participantsRef, data);
-    
+
     // 成功メッセージを表示
-    registerMessage.textContent = "参加登録が完了しました！ご登録いただいたメールアドレスに確認メールをお送りします。";
+    registerMessage.textContent =
+      "参加登録が完了しました！ご登録いただいたメールアドレスに確認メールをお送りします。";
     registerMessage.style.display = "block";
     registerMessage.style.color = "#10b981";
     registerMessage.style.backgroundColor = "#d1fae5";
     registerMessage.style.padding = "1rem";
     registerMessage.style.borderRadius = "0.5rem";
     registerMessage.style.marginTop = "1rem";
-    
+
     // 3秒後にモーダルを閉じる
     setTimeout(() => {
       closeRegisterModal();
     }, 3000);
-    
   } catch (error) {
     console.error("Registration error:", error);
-    registerMessage.textContent = error.message || "登録中にエラーが発生しました。もう一度お試しください。";
+    registerMessage.textContent =
+      error.message || "登録中にエラーが発生しました。もう一度お試しください。";
     registerMessage.style.display = "block";
     registerMessage.style.color = "#ef4444";
     registerMessage.style.backgroundColor = "#fee2e2";
     registerMessage.style.padding = "1rem";
     registerMessage.style.borderRadius = "0.5rem";
     registerMessage.style.marginTop = "1rem";
-    
+
     submitBtn.disabled = false;
     submitBtn.textContent = "登録する";
   }
