@@ -99,15 +99,23 @@ async function main() {
     console.log("   ブラウザでログインしてください...");
     execShow("firebase login");
   } else {
-    // 現在のアカウントを表示
-    const accounts = loginStatus
-      .split("\n")
-      .filter((line) => line.includes("@"))
-      .map((line) => line.trim());
+    // アカウント一覧をパース（メールアドレスのみ抽出）
+    const emailRegex = /[\w.-]+@[\w.-]+\.\w+/g;
+    const allEmails = loginStatus.match(emailRegex) || [];
+    const accounts = [...new Set(allEmails)]; // 重複除去
+
+    // 現在のアカウントを特定（"Logged in as" の行）
+    const currentMatch = loginStatus.match(
+      /Logged in as ([\w.-]+@[\w.-]+\.\w+)/
+    );
+    const currentEmail = currentMatch ? currentMatch[1] : accounts[0];
 
     if (accounts.length > 0) {
       console.log("\n   ログイン済みアカウント:");
-      accounts.forEach((acc, i) => console.log(`   ${i + 1}. ${acc}`));
+      accounts.forEach((acc, i) => {
+        const marker = acc === currentEmail ? " (現在)" : "";
+        console.log(`   ${i + 1}. ${acc}${marker}`);
+      });
       console.log(`   0. 別のアカウントでログイン`);
 
       const choice = await question(
@@ -119,12 +127,13 @@ async function main() {
         execShow("firebase login:add");
         // 追加されたアカウントを使用
         const newLoginStatus = exec("firebase login:list");
-        const newAccounts = newLoginStatus
-          .split("\n")
-          .filter((line) => line.includes("@"))
-          .map((line) => line.trim());
+        const newEmails = newLoginStatus.match(emailRegex) || [];
+        const newAccounts = [...new Set(newEmails)];
         if (newAccounts.length > accounts.length) {
-          const newAccount = newAccounts[newAccounts.length - 1];
+          // 新しく追加されたアカウントを見つける
+          const newAccount =
+            newAccounts.find((acc) => !accounts.includes(acc)) ||
+            newAccounts[newAccounts.length - 1];
           execShow(`firebase login:use ${newAccount}`);
           success(`アカウント切り替え: ${newAccount}`);
         }
@@ -134,10 +143,12 @@ async function main() {
         parseInt(choice) <= accounts.length
       ) {
         const selectedAccount = accounts[parseInt(choice) - 1];
-        execShow(`firebase login:use ${selectedAccount}`);
+        if (selectedAccount !== currentEmail) {
+          execShow(`firebase login:use ${selectedAccount}`);
+        }
         success(`アカウント: ${selectedAccount}`);
       } else {
-        success("Firebase にログイン済み");
+        success(`アカウント: ${currentEmail}`);
       }
     } else {
       success("Firebase にログイン済み");
