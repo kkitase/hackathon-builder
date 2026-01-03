@@ -149,6 +149,18 @@ async function main() {
   // ===========================================
   step(3, "Firebase プロジェクトの設定");
 
+  // 現在のアカウントを確認して表示
+  const currentAccount =
+    exec(
+      "firebase login:list 2>/dev/null | grep -E '\\(current\\)' | head -1"
+    ) || exec("firebase login:list 2>/dev/null | grep '@' | head -1");
+  if (currentAccount) {
+    const accountEmail = currentAccount.match(/[\w.-]+@[\w.-]+/);
+    if (accountEmail) {
+      console.log(`   アカウント: ${accountEmail[0]}`);
+    }
+  }
+
   // 既存のプロジェクト一覧を取得
   console.log("   プロジェクト一覧を取得中...");
   const projectList = exec("firebase projects:list --json");
