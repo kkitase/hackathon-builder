@@ -55,9 +55,14 @@ async function main() {
   console.log("\n🚀 \x1b[1mHackathon Builder - オールインワン初期化\x1b[0m\n");
   console.log("このスクリプトは以下を一括で行います:");
   console.log("  1. 依存関係のインストール");
-  console.log("  2. Firebase プロジェクトの設定");
-  console.log("  3. firebase.js の自動生成");
-  console.log("  4. 管理者アカウントの設定\n");
+  console.log("  2. Firebase CLI のセットアップ");
+  console.log("  3. Firebase プロジェクトの選択");
+  console.log("  4. firebase.js の自動生成");
+  console.log("  5. サービスアカウントキーの確認");
+  console.log("  6. 管理者アカウントの設定\n");
+  console.log(
+    "⚠️  事前に Firebase Console でプロジェクトとサービスを作成してください\n"
+  );
 
   // ===========================================
   // Step 1: 依存関係のインストール
@@ -235,29 +240,9 @@ async function main() {
   success(`プロジェクト: ${projectId}`);
 
   // ===========================================
-  // Step 4: Firebase Console での有効化
+  // Step 4: Webアプリ登録と firebase.js 生成
   // ===========================================
-  step(4, "Firebase Console での有効化");
-
-  console.log("\n   以下を Firebase Console で有効化してください:");
-  console.log(`   https://console.firebase.google.com/project/${projectId}\n`);
-  console.log(
-    "   1. Firestore Database: 構築 → Firestore → データベースの作成 → asia-northeast1 → 本番モード"
-  );
-  console.log(
-    "   2. Authentication: 構築 → Authentication → 始める → Google を有効化"
-  );
-  console.log(
-    "   3. Storage: 構築 → Storage → 始める → asia-northeast1 → 本番モード (Blaze プラン必須)"
-  );
-  console.log("\n   完了したら Enter を押してください...");
-  await question("");
-  success("Firebase Console での設定完了");
-
-  // ===========================================
-  // Step 5: Webアプリ登録と firebase.js 生成
-  // ===========================================
-  step(5, "firebase.js の生成");
+  step(4, "firebase.js の生成");
 
   const firebaseJsPath = resolve(ROOT_DIR, "firebase.js");
 
@@ -275,9 +260,9 @@ async function main() {
   }
 
   // ===========================================
-  // Step 6: サービスアカウントキーの確認
+  // Step 5: サービスアカウントキーの確認
   // ===========================================
-  step(6, "サービスアカウントキーの確認");
+  step(5, "サービスアカウントキーの確認");
 
   const keyPath = resolve(ROOT_DIR, "serviceAccountKey.json");
   if (!existsSync(keyPath)) {
@@ -304,9 +289,9 @@ async function main() {
   success("serviceAccountKey.json を検出");
 
   // ===========================================
-  // Step 7: 管理者アカウントの設定
+  // Step 6: 管理者アカウントの設定
   // ===========================================
-  step(7, "管理者アカウントの設定");
+  step(6, "管理者アカウントの設定");
 
   // Firebase Admin を動的にインポート
   const { initializeApp, cert } = await import("firebase-admin/app");
@@ -380,17 +365,47 @@ async function generateFirebaseJs(projectId, outputPath) {
     return;
   }
 
-  // 設定をパース
-  const configMatch = sdkConfig.match(/const firebaseConfig = \{[\s\S]*?\};/);
-  if (!configMatch) {
+  // 設定をパース（JSON 形式または JavaScript 形式に対応）
+  let configContent;
+
+  // まず JSON 形式を試す（新しい firebase CLI の出力形式）
+  const jsonMatch = sdkConfig.match(/\{[\s\S]*"projectId"[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0]);
+      // 必要な項目のみ抽出
+      configContent = JSON.stringify(
+        {
+          apiKey: parsed.apiKey,
+          authDomain: parsed.authDomain,
+          projectId: parsed.projectId,
+          storageBucket: parsed.storageBucket,
+          messagingSenderId: parsed.messagingSenderId,
+          appId: parsed.appId,
+        },
+        null,
+        2
+      );
+    } catch (e) {
+      configContent = null;
+    }
+  }
+
+  // JSON パースに失敗した場合は従来の JavaScript 形式を試す
+  if (!configContent) {
+    const configMatch = sdkConfig.match(/const firebaseConfig = \{[\s\S]*?\};/);
+    if (configMatch) {
+      configContent = configMatch[0]
+        .replace("const firebaseConfig = ", "")
+        .replace(";", "");
+    }
+  }
+
+  if (!configContent) {
     error("SDK 設定のパースに失敗しました");
     console.log("   手動で firebase.js.example をコピーして編集してください");
     return;
   }
-
-  const configContent = configMatch[0]
-    .replace("const firebaseConfig = ", "")
-    .replace(";", "");
 
   const firebaseJsContent = `// Firebase 設定（自動生成）
 import { initializeApp } from "firebase/app";

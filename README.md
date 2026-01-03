@@ -33,27 +33,51 @@ git clone https://github.com/kkitase/hackathon-builder.git
 cd hackathon-builder
 ```
 
-### 2. 初期化とデプロイ
+### 2. Firebase プロジェクトの作成
+
+[Firebase Console](https://console.firebase.google.com/) で新しいプロジェクトを作成します。
+
+1. 「新しい Firebase プロジェクトを作成」をクリック
+2. プロジェクト名を入力（例: `my-hackathon`）
+3. Google Analytics は任意で設定
+4. 「プロジェクトを作成」をクリック
+
+### 3. Firebase サービスの有効化
+
+作成したプロジェクトで、以下のサービスを有効化します：
+
+| サービス | 設定手順 |
+|---------|---------|
+| **Firestore** | 構築 → 「Firestore Database」→ データベースの作成 → Standard エディション →`asia-northeast1` → 本番環境モードで開始する |
+| **Authentication** | 構築 → 「Authentication」→ 始める → **Google** →　プロジェクトのサポートメールの設定 →　有効にする |
+| **Storage** | 構築 → 「Storage」→ プロジェクトをアップグレード → Cloud請求先アカウントを構築する → Cloud請求先アカウントをリンク → 使ってみる → すべてのロケーション →`asia-northeast1` → 本番環境モードで開始する |
+
+> ⚠️ **Storage と Cloud Functions を使用するには Blaze プラン（従量制）へのアップグレードが必要です。Google Cloud の課金アカウントを設定してください。小〜中規模のサイトであれば費用はほとんどかかりませんが、利用状況により課金が発生する場合があります。ご了承ください。**
+
+### 4. サービスアカウントキーのダウンロード
+
+1. Firebase Console → ⚙️ プロジェクト設定 → 「サービスアカウント」タブ
+2. 「新しい秘密鍵の生成」をクリック
+3. ダウンロードしたファイルを `serviceAccountKey.json` として、ルートフォルダに配置
+
+### 5. 初期化
 
 ```bash
-# 対話形式で全てを一括設定
+# 対話形式で初期化（作成したFirebaseプロジェクトを選択）
 npm run init
 ```
 
 `npm run init` は以下を対話形式で行います：
 1. 依存関係のインストール
 2. Firebase CLI のセットアップ
-3. プロジェクトの作成/選択
-4. **Firebase Console での有効化**（案内表示後、手動で設定）
-   - Firestore Database: 構築 → 「Firestore Database」→ データベースの作成 → `asia-northeast1` → 本番モード
-   - Authentication: 構築 → 「Authentication」→ 始める → **Google** を有効化
-   - Storage: 構築 → 「Storage」→ 始める → `asia-northeast1` → 本番モード（Blaze プラン必須）
-5. firebase.js の自動生成
-6. サービスアカウントキーの確認（案内表示後、手動でダウンロード）
-7. 管理者アカウントの設定
+3. **作成済みプロジェクトの選択**
+4. `firebase.js` の自動生成
+5. 管理者アカウントの設定
 
-初期化完了後、デプロイを実行：
+### 6. デプロイ
+
 ```bash
+# ビルドとデプロイ
 npm run deploy
 ```
 
